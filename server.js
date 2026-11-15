@@ -11,7 +11,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const players = {};
 
-// สถานะโลกทั้งเซิร์ฟเวอร์
+// สถานะโลกทั้งเซิร์ฟเวอร์ (อัปเดตแผนที่ขยาย 3200x2400 รองรับหมู่เกาะใหม่)
 let world = {
   timeMinutes: 480,      // เริ่ม 08:00
   isNight: false,
@@ -19,8 +19,8 @@ let world = {
   weatherTimer: 90,      // เปลี่ยนสภาพอากาศทุก 90 วินาที
   bossActive: false,
   bossSecondsLeft: 3600, // บอสปลาหมึกยักษ์เกิดทุก 1 ชั่วโมง
-  bossX: 850,
-  bossY: 350,
+  bossX: 2150,
+  bossY: 950,
   seaKingCaughtBy: null  // ปลา God-tier "ราชาแห่งท้องทะเล" มีตัวเดียวในเซิร์ฟเวอร์
 };
 
@@ -55,8 +55,8 @@ setInterval(() => {
 
 function spawnBoss() {
   world.bossActive = true;
-  world.bossX = 820 + Math.random() * 80;
-  world.bossY = 200 + Math.random() * 300;
+  world.bossX = 2100 + Math.random() * 120;
+  world.bossY = 850 + Math.random() * 180;
   io.emit('serverAnnouncement', {
     msg: '⚠️ [BOSS] บอสปลาหมึกยักษ์ปรากฏตัวที่โซน 5 (ทะเลลึก) แล้ว!',
     color: '#ff4757'
@@ -93,10 +93,11 @@ io.on('connection', (socket) => {
       name: cleanName,
       lvl: 1,
       title: '',
-      x: 80,
-      y: 300,
+      x: 965,
+      y: 905,
       boat: 0,
       rod: 0,
+      skin: 0,
       isFishing: false,
       color: `hsl(${Math.floor(Math.random() * 360)}, 80%, 60%)`
     };
@@ -106,7 +107,7 @@ io.on('connection', (socket) => {
     broadcastLeaderboard();
 
     io.emit('serverAnnouncement', {
-      msg: `⛵ กัปตัน ${cleanName} เข้าสู่โลกแห่งการตกปลา!`,
+      msg: `⛵ กัปตัน ${cleanName} เข้าสู่โลกแห่งหมู่เกาะตกปลา!`,
       color: '#64ffda'
     });
   });
@@ -119,6 +120,7 @@ io.on('connection', (socket) => {
     players[socket.id].y = data.y;
     players[socket.id].boat = data.boat;
     players[socket.id].rod = data.rod;
+    players[socket.id].skin = data.skin || 0;
     players[socket.id].lvl = Math.min(100, data.lvl);
     players[socket.id].title = data.title || '';
     players[socket.id].isFishing = data.isFishing;
