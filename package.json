@@ -1,0 +1,13 @@
+{
+  "name": "ocean-master-online",
+  "version": "1.0.0",
+  "description": "Web-based Multiplayer Fishing Game with 6 Zones, 6 Rarities, Tension Minigame, Weather, Bosses, and Lv.100 Rewards",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  }
+}

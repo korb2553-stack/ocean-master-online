@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ocean Master Online - เกมตกปลาออนไลน์</title>
+<script src="/socket.io/socket.io.js"></script>
+<style>
+  * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+  body { background: #0a192f; color: #fff; overflow: hidden; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+  
+  #login-screen {
+    position: fixed; inset: 0; background: rgba(10, 25, 47, 0.96);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100;
+  }
+  #login-box {
+    background: #112240; padding: 28px; border-radius: 12px; border: 2px solid #64ffda;
+    text-align: center; width: 90%; max-width: 360px;
+  }
+  #login-box input {
+    width: 100%; padding: 12px; margin: 15px 0; border-radius: 6px; border: 1px solid #233554;
+    background: #0a192f; color: #fff; font-size: 16px; text-align: center;
+  }
+  button {
+    background: #64ffda; color: #0a192f; border: none; padding: 8px 12px;
+    font-size: 13px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.15s;
+  }
+  button:hover { background: #4cd6b5; }
+  button:active { transform: scale(0.96); }
+  button:disabled { background: #555; color: #888; cursor: not-allowed; }
+  .error { color: #ff6b6b; font-size: 13px; margin-bottom: 10px; min-height: 20px; }
+
+  #game-canvas { display: block; width: 100vw; height: 100vh; }
+
+  #top-bar {
+    position: fixed; top: 8px; left: 8px; right: 8px;
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; pointer-events: none; flex-wrap: wrap;
+  }
+  .panel {
+    background: rgba(17, 34, 64, 0.9); padding: 8px 12px; border-radius: 8px;
+    border: 1px solid #233554; pointer-events: auto;
+  }
+  .stat { margin-right: 8px; font-weight: bold; font-size: 13px; }
+  .gold { color: #ffd700; }
+  .lvl { color: #64ffda; }
+
+  #boss-alert { color: #ff4757; font-weight: bold; animation: pulse 1s infinite; display: none; font-size: 12px; }
+  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+  /* กระดานอันดับ */
+  #leaderboard-panel {
+    position: fixed; top: 92px; right: 8px; width: 210px;
+    background: rgba(17, 34, 64, 0.88); border: 1px solid #233554;
+    border-radius: 8px; padding: 8px 10px; font-size: 11px;
+  }
+  #leaderboard-panel h4 { color: #ffd700; border-bottom: 1px solid #233554; padding-bottom: 4px; margin-bottom: 5px; }
+  .lb-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
+  .lb-max { color: #ffd700; font-weight: bold; }
+
+  /* มินิเกมเย่อเบ็ดสู้แรงปลา */
+  #minigame-box {
+    position: fixed; top: 42%; left: 50%; transform: translate(-50%, -50%);
+    background: rgba(17, 34, 64, 0.97); border: 2px solid #ffd700; border-radius: 12px;
+    padding: 18px; width: 92%; max-width: 390px; text-align: center; display: none; z-index: 40;
+  }
+  #bar-container {
+    width: 100%; height: 30px; background: #ff4757; border-radius: 15px;
+    position: relative; overflow: hidden; margin: 12px 0 8px; border: 1px solid #fff;
+  }
+  #target-zone { position: absolute; top: 0; bottom: 0; background: #2ed573; border-left: 2px solid #fff; border-right: 2px solid #fff; }
+  #cursor-bar { position: absolute; top: 0; bottom: 0; width: 8px; background: #fff; box-shadow: 0 0 8px #000; left: 50%; }
+
+  /* ปุ่มควบคุมบนมือถือ/iOS */
+  #mobile-dpad {
+    position: fixed; bottom: 75px; right: 14px;
+    display: grid; grid-template-columns: repeat(3, 44px); gap: 5px; z-index: 30; opacity: 0.85;
+  }
+  #mobile-dpad button { height: 44px; font-size: 16px; padding: 0; background: rgba(17, 34, 64, 0.9); color: #64ffda; border: 1px solid #64ffda; }
+
+  #bottom-controls {
+    position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; width: 98%; max-width: 780px; z-index: 25;
+  }
+
+  .modal {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: #112240; border: 2px solid #64ffda; border-radius: 12px;
+    padding: 16px; width: 94%; max-width: 540px; max-height: 82vh; overflow-y: auto;
+    display: none; z-index: 50;
+  }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #233554; padding-bottom: 8px; }
+  .item-row {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #0a192f; padding: 8px 10px; margin-bottom: 6px; border-radius: 6px; font-size: 12px;
+  }
+  .exclusive-item { border: 1px solid #ffd700; background: linear-gradient(90deg, #1a1a00, #0a192f); }
+  .close-btn { background: #ff4757; color: white; padding: 4px 10px; }
+
+  .r-common { color: #2ed573; }
+  .r-uncommon { color: #1e90ff; }
+  .r-rare { color: #a55eea; }
+  .r-legendary { color: #ffa502; }
+  .r-mythic { color: #ff4757; }
+  .r-god { color: #ffd700; text-shadow: 0 0 6px #ffd700; }
+
+  .dex-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .dex-card { background: #0a192f; padding: 8px; border-radius: 6px; border: 1px solid #233554; font-size: 11px; }
+  .dex-locked { opacity: 0.45; }
+
+  /* แชท */
+  #chat-wrapper {
+    position: fixed; bottom: 75px; left: 10px; width: 280px; max-width: 60vw;
+    background: rgba(10, 25, 47, 0.85); border: 1px solid #233554;
+    border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; z-index: 20;
+  }
+  #chat-log { height: 110px; padding: 6px 8px; overflow-y: auto; font-size: 11px; user-select: text; word-wrap: break-word; }
+  .log-entry { margin-bottom: 3px; line-height: 1.3; }
+  #chat-form { display: flex; border-top: 1px solid #233554; background: #112240; }
+  #chat-input { flex: 1; background: transparent; border: none; color: #fff; padding: 6px 8px; font-size: 12px; outline: none; }
+  #chat-send-btn { background: #64ffda; color: #0a192f; border: none; padding: 0 10px; font-size: 12px; font-weight: bold; border-radius: 0; }
+</style>
+</head>
+<body>
+
+  <!-- หน้าจอตั้งชื่อ -->
+  <div id="login-screen">
+    <div id="login-box">
+      <h2 style="color: #64ffda; margin-bottom: 8px;">🌊 Ocean Master Online</h2>
+      <p style="font-size: 13px; color: #8892b0;">ตั้งชื่อตัวละคร (ขั้นต่ำ 3 ตัว ห้ามอักษรพิเศษ)</p>
+      <input type="text" id="username-input" placeholder="กรอกชื่อกัปตัน..." maxlength="15">
+      <div class="error" id="login-error"></div>
+      <button onclick="joinServer()" style="width:100%; padding:12px; font-size:15px;">เข้าสู่เซิร์ฟเวอร์</button>
+    </div>
+  </div>
+
+  <canvas id="game-canvas"></canvas>
+
+  <!-- UI ด้านบน -->
+  <div id="top-bar">
+    <div class="panel">
+      <span class="stat" id="ui-name">กัปตัน: -</span>
+      <span class="stat lvl">Lv.<span id="ui-lvl">1</span> (<span id="ui-exp">0/100</span>)</span>
+      <span class="stat gold">💰 <span id="ui-money">50</span> G</span>
+      <span style="font-size:11px; color:#8892b0;">🟢 <span id="online-count">1</span></span>
+    </div>
+
+    <div class="panel" style="text-align: center;">
+      <div style="font-size:12px;">
+        <span id="ui-time">☀️ กลางวัน (08:00)</span> | 
+        <span id="ui-weather" style="color:#70a1ff;">🌤️ แจ่มใส</span>
+      </div>
+      <div id="ui-zone" style="font-weight:bold; color:#64ffda; font-size:12px; margin: 2px 0;">โซน 1: บ่อน้ำจืด (Lv.1+)</div>
+      <div id="boss-timer" style="font-size: 11px; color: #8892b0;">บอสเกิดใน: 60:00</div>
+      <div id="boss-alert">⚠️ บอสปลาหมึกยักษ์ปรากฏตัวในโซน 5! ⚠️</div>
+    </div>
+
+    <div class="panel" style="font-size: 11px;">
+      <div>🚤 เรือ: <span id="ui-boat">เรือไม้พาย</span></div>
+      <div>🎣 เบ็ด: <span id="ui-rod">เบ็ดไม้ไผ่</span></div>
+      <div>🪱 เหยื่อ: <span id="ui-bait">หนอน (10 ชิ้น)</span></div>
+      <div>🧭 <span id="ui-relic" style="color:#ff6b6b;">❌ ยังไม่มีเข็มทิศซากเรือ</span></div>
+    </div>
+  </div>
+
+  <!-- กระดานอันดับ -->
+  <div id="leaderboard-panel">
+    <h4>🏆 กระดานอันดับ (Top 10)</h4>
+    <div id="leaderboard-list"></div>
+  </div>
+
+  <!-- มินิเกมเย่อเบ็ดสู้แรงปลา (Tension & Stamina) -->
+  <div id="minigame-box">
+    <h3 id="minigame-title" style="color: #ffd700;">🎣 ปลากินเหยื่อแล้ว!</h3>
+    <p id="minigame-sub" style="font-size: 11px; color: #8892b0; margin-top: 4px;">
+      กดค้าง <b>[SPACEBAR]</b> หรือกดปุ่มด้านล่างค้างเพื่อเย่อเบ็ด!
+    </p>
+
+    <div style="margin-top: 10px; text-align: left; font-size: 11px;">
+      <div style="display: flex; justify-content: space-between;">
+        <span>🐟 ความอึดปลา (Stamina)</span>
+        <span id="stamina-text">100 / 100</span>
+      </div>
+      <div style="width: 100%; height: 10px; background: #0a192f; border-radius: 5px; overflow: hidden; margin-top: 3px; border: 1px solid #233554;">
+        <div id="stamina-bar" style="width: 100%; height: 100%; background: #1e90ff;"></div>
+      </div>
+    </div>
+
+    <div id="bar-container">
+      <div id="target-zone"></div>
+      <div id="cursor-bar"></div>
+    </div>
+
+    <div style="text-align: left; font-size: 11px; margin-bottom: 10px;">
+      <div style="display: flex; justify-content: space-between; color: #ff6b6b;">
+        <span id="snap-warning">⚠️ สถานะสายเบ็ด: ปกติ</span>
+        <span id="snap-text">0.0s</span>
+      </div>
+      <div style="width: 100%; height: 8px; background: #0a192f; border-radius: 4px; overflow: hidden; margin-top: 3px;">
+        <div id="snap-bar" style="width: 0%; height: 100%; background: #ff4757;"></div>
+      </div>
+    </div>
+
+    <button id="reel-hold-btn"
+      onmousedown="isReeling = true" onmouseup="isReeling = false" onmouseleave="isReeling = false"
+      ontouchstart="isReeling = true" ontouchend="isReeling = false"
+      style="width: 100%; padding: 12px; background: #ffd700; font-size: 15px;">
+      ✊ กดค้างเพื่อเย่อเบ็ด!
+    </button>
+  </div>
+
+  <!-- แชท -->
+  <div id="chat-wrapper">
+    <div id="chat-log"></div>
+    <form id="chat-form" onsubmit="sendChatMessage(event)">
+      <input type="text" id="chat-input" placeholder="พิมพ์แชท..." maxlength="80" autocomplete="off">
+      <button type="submit" id="chat-send-btn">ส่ง</button>
+    </form>
+  </div>
+
+  <!-- ปุ่มบังคับทิศทางสำหรับ iOS / มือถือ -->
+  <div id="mobile-dpad">
+    <div></div>
+    <button ontouchstart="keys['w']=true" ontouchend="keys['w']=false" onmousedown="keys['w']=true" onmouseup="keys['w']=false">▲</button>
+    <div></div>
+    <button ontouchstart="keys['a']=true" ontouchend="keys['a']=false" onmousedown="keys['a']=true" onmouseup="keys['a']=false">◀</button>
+    <button ontouchstart="keys['s']=true" ontouchend="keys['s']=false" onmousedown="keys['s']=true" onmouseup="keys['s']=false">▼</button>
+    <button ontouchstart="keys['d']=true" ontouchend="keys['d']=false" onmousedown="keys['d']=true" onmouseup="keys['d']=false">▶</button>
+  </div>
+
+  <!-- ปุ่มควบคุม -->
+  <div id="bottom-controls">
+    <button id="fish-btn" onclick="toggleFishing()">🎣 หย่อนเบ็ดตกปลา</button>
+    <button onclick="openModal('bag-modal')">🎒 กระเป๋า (<span id="bag-count">0</span>)</button>
+    <button onclick="openModal('dex-modal')">📖 สมุดปลา (<span id="dex-count">0</span>/<span id="dex-total">0</span>)</button>
+    <button onclick="openModal('shop-modal')">🏪 ร้านค้า & เหยื่อ</button>
+    <button onclick="socket.emit('cycleWeather')" style="background: #70a1ff;">🌦️ อากาศ</button>
+    <button onclick="socket.emit('forceSpawnBoss')" style="background: #ff4757; color: white;">🐙 บอส</button>
+    <button onclick="cheatMaxLevel()" style="background: #ffd700;">👑 Lv.100</button>
+  </div>
+
+  <!-- หน้าต่างกระเป๋า -->
+  <div class="modal" id="bag-modal">
+    <div class="modal-header">
+      <h3>🎒 กระเป๋าปลา</h3>
+      <button class="close-btn" onclick="closeModals()">X</button>
+    </div>
+    <div id="bag-list"></div>
+    <button style="width: 100%; margin-top: 10px;" onclick="sellAllFish()">💰 ขายปลาทั้งหมด</button>
+  </div>
+
+  <!-- หน้าต่างสมุดสะสมปลา -->
+  <div class="modal" id="dex-modal">
+    <div class="modal-header">
+      <h3>📖 สมุดสะสมปลา (<span id="dex-modal-progress">0/0</span>)</h3>
+      <button class="close-btn" onclick="closeModals()">X</button>
+    </div>
+    <p style="font-size:11px; color:#ffd700; margin-bottom:8px;">
+      🌟 สะสมครบทุกสายพันธุ์: ปลดล็อก "เบ็ดเทพเลวีอาธาน" และสิทธิ์จับ "ปลาเลวีอาธาน" ในโซน 6!
+    </p>
+    <div class="dex-grid" id="dex-grid"></div>
+  </div>
+
+  <!-- หน้าต่างร้านค้า -->
+  <div class="modal" id="shop-modal">
+    <div class="modal-header">
+      <h3>🏪 ร้านค้าท่าเรือ & อุปกรณ์</h3>
+      <button class="close-btn" onclick="closeModals()">X</button>
+    </div>
+    <h4 style="color: #64ffda; margin: 8px 0 4px;">🧭 ไอเทมพิเศษ</h4>
+    <div id="shop-relics"></div>
+    <h4 style="color: #64ffda; margin: 8px 0 4px;">🪱 เหยื่อตกปลา (ซื้อเป็นชิ้น)</h4>
+    <div id="shop-baits"></div>
+    <h4 style="color: #64ffda; margin: 8px 0 4px;">🚤 เรือ</h4>
+    <div id="shop-boats"></div>
+    <h4 style="color: #64ffda; margin: 8px 0 4px;">🎣 คันเบ็ด</h4>
+    <div id="shop-rods"></div>
+  </div>
+
+<script>
+const socket = io();
+const MAX_LEVEL = 100;
+
+// ================= 1. ฐานข้อมูลไอเทม เรือ เบ็ด เหยื่อ =================
+const BOATS = [
+  { id: 0, name: "เรือไม้พาย (โซน 1-2)", reqLvl: 1, price: 0, speed: 3.5, maxZone: 2 },
+  { id: 1, name: "เรือหางยาว (เข้าโซน 3 ชายฝั่ง)", reqLvl: 25, price: 500, speed: 5.5, maxZone: 3 },
+  { id: 2, name: "เรือสปีดโบ๊ท (เข้าโซน 4 ทะเลเปิด)", reqLvl: 45, price: 2500, speed: 8.0, maxZone: 4 },
+  { id: 3, name: "เรือสำรวจน้ำลึก (เข้าโซน 5 ทะเลลึก)", reqLvl: 65, price: 8000, speed: 10.5, maxZone: 5 },
+  { id: 4, name: "เรือดำน้ำโบราณ (เข้าโซน 6 ถ้ำ/ซากเรือ)", reqLvl: 85, price: 25000, speed: 12.5, maxZone: 6 },
+  { id: 5, name: "👑 เรือจักรพรรดิทองคำ [สกิน Lv.100]", reqLvl: 100, price: 0, speed: 15, maxZone: 6, exclusive: true }
+];
+
+const RODS = [
+  { id: 0, name: "เบ็ดไม้ไผ่", reqLvl: 1, price: 0, power: 1, zoneSize: 28 },
+  { id: 1, name: "เบ็ดไฟเบอร์", reqLvl: 21, price: 400, power: 2, zoneSize: 32 },
+  { id: 2, name: "เบ็ดคาร์บอน", reqLvl: 41, price: 2000, power: 4, zoneSize: 36 },
+  { id: 3, name: "เบ็ดไทเทเนียม", reqLvl: 61, price: 7500, power: 7, zoneSize: 42 },
+  { id: 4, name: "เบ็ดคริสตัลตำนาน", reqLvl: 81, price: 20000, power: 10, zoneSize: 48 },
+  { id: 5, name: "🔱 ตรีศูลแห่งโพไซดอน [Lv.100]", reqLvl: 100, price: 0, power: 15, zoneSize: 58, exclusive: true },
+  { id: 6, name: "🌌 เบ็ดเทพเลวีอาธาน [สมุดปลา 100%]", reqLvl: 100, price: 0, power: 20, zoneSize: 68, exclusive: true, requiresFullDex: true }
+];
+
+const BAITS = [
+  { id: 0, name: "🪱 หนอน", price: 5, targetDesc: "ปลาน้ำจืดทั่วไป", zoneDesc: "บ่อ, แม่น้ำ (โซน 1-2)", allowedZones: [1, 2], bonusDesc: "+10% อัตราการกัด", biteSpeedBonus: 0.10 },
+  { id: 1, name: "🦐 กุ้งสด", price: 15, targetDesc: "ปลากินเนื้อ, ปลาช่อน", zoneDesc: "แม่น้ำ, ชายฝั่ง (โซน 2-3)", allowedZones: [2, 3], bonusDesc: "+15% ปลา Uncommon", rarityBoost: { uncommon: 1.15 } },
+  { id: 2, name: "🐟 ปลาเหยื่อ", price: 25, targetDesc: "ปลาใหญ่, ฉลาม", zoneDesc: "ทะเลเปิด (โซน 4)", allowedZones: [4], bonusDesc: "+20% ปลา Rare", rarityBoost: { rare: 1.20 } },
+  { id: 3, name: "✨ เหยื่อเรืองแสง", price: 60, targetDesc: "ปลาลึก, ปลา Mythic", zoneDesc: "ทะเลลึก, ถ้ำใต้น้ำ (โซน 5-6)", allowedZones: [5, 6], bonusDesc: "+30% ปลา Mythic", rarityBoost: { mythic: 1.30 } },
+  { id: 4, name: "🍖 เหยื่อเนื้อ", price: 40, targetDesc: "ปลาปิรันย่า, ปลาดุก", zoneDesc: "บ่อ, แม่น้ำป่า (โซน 1-2)", allowedZones: [1, 2], bonusDesc: "+25% ปลากินเนื้อ", favFishIds: ["c3", "u4", "u5"] },
+  { id: 5, name: "🎣 เหยื่อปลอม", price: 80, targetDesc: "ปลาเร็ว, ปลากระโทง", zoneDesc: "ทะเลเปิด, ทะเลลึก (โซน 4-5)", allowedZones: [4, 5], bonusDesc: "+35% ปลา Legendary", rarityBoost: { legendary: 1.35 } },
+  { id: 6, name: "🧊 เหยื่อน้ำแข็ง", price: 50, targetDesc: "ปลาน้ำเย็น (ไวท์ฟิช)", zoneDesc: "ทะเลลึก/น้ำแข็ง (โซน 5)", allowedZones: [5], bonusDesc: "จำเป็นสำหรับปลาไวท์ฟิช", reqForFishId: "l5" }
+];
+
+// ================= 2. ฐานข้อมูลปลา 6 ระดับ =================
+const FISH_DB = [
+  // 🟢 Common (Lv. 1-20)
+  { id: "c1", name: "ปลาซิว", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 1, subZone: "บ่อน้ำจืด", baseSize: "เล็ก", price: 5, exp: 15, weight: 50, speed: 1.4, favBaits: [0] },
+  { id: "c2", name: "ปลาตะเพียน", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 2, subZone: "แม่น้ำ", baseSize: "เล็ก–กลาง", price: 8, exp: 20, weight: 45, speed: 1.5, favBaits: [0] },
+  { id: "c3", name: "ปลาดุก", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 1, subZone: "บ่อโคลน", baseSize: "กลาง", price: 12, exp: 25, weight: 40, speed: 1.6, favBaits: [0, 4] },
+  { id: "c4", name: "ปลาหมอ", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 1, subZone: "ลำคลอง", baseSize: "กลาง", price: 15, exp: 30, weight: 35, speed: 1.7, favBaits: [0] },
+  { id: "c5", name: "ปลาไหล", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 2, subZone: "หน้าดิน", baseSize: "ยาว", price: 18, exp: 35, weight: 30, speed: 1.8, favBaits: [0] },
+
+  // 🔵 Uncommon (Lv. 21-40)
+  { id: "u1", name: "ปลาเสือ", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 2, subZone: "แม่น้ำลึก", baseSize: "กลาง–ใหญ่", price: 40, exp: 65, weight: 35, speed: 2.2, favBaits: [1, 4] },
+  { id: "u2", name: "ปลาเก๋า", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 3, subZone: "ชายฝั่ง", baseSize: "กลาง", price: 55, exp: 80, weight: 40, speed: 2.3, favBaits: [1] },
+  { id: "u3", name: "ปลากะพง", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 3, subZone: "ปากแม่น้ำ", baseSize: "ใหญ่", price: 70, exp: 95, weight: 35, speed: 2.4, favBaits: [1] },
+  { id: "u4", name: "ปลาช่อน", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 2, subZone: "บ่อหญ้า", baseSize: "ยาว", price: 85, exp: 110, weight: 30, speed: 2.5, favBaits: [1, 4] },
+  { id: "u5", name: "ปลาปิรันย่า", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 2, subZone: "แม่น้ำป่า", baseSize: "กลาง", price: 100, exp: 130, weight: 25, speed: 2.7, favBaits: [4] },
+
+  // 🟣 Rare (Lv. 41-60)
+  { id: "r1", name: "ปลาแซลมอน", rarity: "rare", rLabel: "🟣 หายาก", zone: 2, subZone: "แม่น้ำเย็น", baseSize: "ใหญ่", price: 250, exp: 220, weight: 22, speed: 3.1, favBaits: [1] },
+  { id: "r2", name: "ปลาทูน่า", rarity: "rare", rLabel: "🟣 หายาก", zone: 4, subZone: "ทะเลเปิด", baseSize: "ใหญ่มาก", price: 400, exp: 320, weight: 35, speed: 3.3, favBaits: [2, 5] },
+  { id: "r3", name: "ปลากระโทงแทง", rarity: "rare", rLabel: "🟣 หายาก", zone: 5, subZone: "ทะเลลึก", baseSize: "ยาวมาก", price: 550, exp: 420, weight: 30, speed: 3.5, favBaits: [5] },
+  { id: "r4", name: "ปลาฉลามเสือ", rarity: "rare", rLabel: "🟣 หายาก", zone: 3, subZone: "ชายฝั่งลึก", baseSize: "ใหญ่", price: 700, exp: 520, weight: 20, speed: 3.7, favBaits: [1] },
+  { id: "r5", name: "ปลาไพก์", rarity: "rare", rLabel: "🟣 หายาก", zone: 4, subZone: "ทะเลสาบเหนือ", baseSize: "ยาว", price: 800, exp: 600, weight: 25, speed: 3.8, favBaits: [2] },
+
+  // 🟠 Legendary (Lv. 61-80)
+  { id: "l1", name: "ปลากระเบนยักษ์", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 2, subZone: "แม่น้ำลึก", baseSize: "ใหญ่", price: 1500, exp: 950, weight: 12, speed: 4.1, favBaits: [1, 4] },
+  { id: "l2", name: "ปลาฉลามขาว", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 4, subZone: "ทะเลเปิด", baseSize: "ใหญ่มาก", price: 2500, exp: 1400, weight: 18, speed: 4.3, favBaits: [2, 5] },
+  { id: "l3", name: "ปลาอาราไพมา", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 2, subZone: "แม่น้ำป่า", baseSize: "ยาวมาก", price: 3000, exp: 1700, weight: 10, speed: 4.4, favBaits: [4] },
+  { id: "l4", name: "ปลาหมึกยักษ์", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 5, subZone: "ทะเลลึก", baseSize: "ใหญ่", price: 4000, exp: 2100, weight: 20, speed: 4.6, favBaits: [3, 5] },
+  { id: "l5", name: "ปลาไวท์ฟิช", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 5, subZone: "ทะเลสาบน้ำแข็ง", baseSize: "กลาง", price: 5000, exp: 2500, weight: 22, speed: 4.7, favBaits: [6], cond: "ice_bait", condText: "ต้องใช้ 🧊 เหยื่อน้ำแข็ง" },
+
+  // 🔴 Mythic (Lv. 81-99)
+  { id: "m1", name: "ปลามังกร", rarity: "mythic", rLabel: "🔴 Mythic", zone: 6, subZone: "ถ้ำใต้น้ำ", baseSize: "ยาวมาก", price: 10000, exp: 4000, weight: 25, speed: 5.0, favBaits: [3], cond: "night", condText: "กลางคืนเท่านั้น" },
+  { id: "m2", name: "ปลาเรืองแสง", rarity: "mythic", rLabel: "🔴 Mythic", zone: 5, subZone: "ทะเลลึก", baseSize: "กลาง", price: 12000, exp: 4500, weight: 25, speed: 5.1, favBaits: [3], cond: "rain", condText: "ฝนตกเท่านั้น" },
+  { id: "m3", name: "ปลาโบราณ", rarity: "mythic", rLabel: "🔴 Mythic", zone: 6, subZone: "ซากเรือจม", baseSize: "ใหญ่", price: 15000, exp: 5200, weight: 25, speed: 5.2, favBaits: [3], cond: "relic", condText: "ต้องมีเข็มทิศซากเรือ" },
+  { id: "m4", name: "ปลาวิญญาณ", rarity: "mythic", rLabel: "🔴 Mythic", zone: 6, subZone: "ม่านหมอก", baseSize: "ลึกลับ", price: 20000, exp: 6500, weight: 8, speed: 5.4, favBaits: [3], cond: "fog", condText: "หมอกลงเท่านั้น (หายาก 1%)" },
+
+  // 🌟 God-tier (Lv. 100)
+  { id: "g1", name: "ราชาแห่งท้องทะเล", rarity: "god", rLabel: "🌟 God-tier", zone: 6, subZone: "บัลลังก์สมุทร", baseSize: "มหึมา", price: 50000, exp: 0, weight: 10, speed: 5.8, favBaits: [3], cond: "god_seaking", condText: "Lv.100 (มีตัวเดียวในเซิร์ฟเวอร์)" },
+  { id: "g2", name: "ปลาเลวีอาธาน", rarity: "god", rLabel: "🌟 God-tier", zone: 6, subZone: "ห้วงอเวจี", baseSize: "เทวะ", price: 80000, exp: 0, weight: 15, speed: 6.0, favBaits: [3], cond: "god_leviathan", condText: "Lv.100 + สะสมปลาครบทุกสายพันธุ์" }
+];
+
+const BOSS_FISH = { id: "boss_kraken", name: "👑 บอสปลาหมึกยักษ์คราเคน", rarity: "god", rLabel: "👑 WORLD BOSS", price: 15000, exp: 5000, speed: 5.5, isBoss: true };
+
+// ตารางสุ่มขนาดปลา 5 ระดับ
+const SIZE_MODIFIERS = [
+  { label: "เล็ก (Small)",     weightMult: 0.5, priceMult: 0.6, chance: 0.40, color: "#a4b0be" },
+  { label: "กลาง (Medium)",   weightMult: 1.0, priceMult: 1.0, chance: 0.35, color: "#ffffff" },
+  { label: "ใหญ่ (Large)",     weightMult: 1.5, priceMult: 1.8, chance: 0.18, color: "#2ed573" },
+  { label: "ยักษ์ (Giant)",    weightMult: 2.5, priceMult: 4.0, chance: 0.06, color: "#ffa502" },
+  { label: "ตำนาน (Trophy)",  weightMult: 4.0, priceMult: 8.0, chance: 0.01, color: "#ffd700" }
+];
+
+// ================= สถานะเกม =================
+let myPlayer = null;
+let otherPlayers = {};
+let chatBubbles = {};
+let particles = [];
+let world = { timeMinutes: 480, isNight: false, weather: 'clear', bossActive: false, bossSecondsLeft: 3600, bossX: 850, bossY: 350, seaKingCaughtBy: null };
+const keys = {};
+let fishingTimer = null;
+
+// สถานะระบบเย่อเบ็ด (Tension & Stamina)
+let isReeling = false;
+let lastFrameTime = performance.now();
+let minigame = {
+  active: false, targetFish: null, cursorPos: 50, zoneStart: 30,
+  tensionZone: 40, pullStrength: 1.0, stamina: 100, maxStamina: 100,
+  struggleInterval: 1.5, struggleTimer: 0, snapTime: 2.0, dangerTimer: 0
+};
+
+// ================= Socket.io =================
+function joinServer() { socket.emit("joinGame", document.getElementById("username-input").value); }
+document.getElementById("username-input").addEventListener("keydown", (e) => { if (e.key === "Enter") joinServer(); });
+socket.on("joinError", (msg) => { document.getElementById("login-error").innerText = msg; });
+
+socket.on("joinSuccess", (data) => {
+  myPlayer = {
+    ...data.player,
+    exp: 0, money: 50, rod: 0, bait: 0,
+    hasRelic: false,
+    ownedBoats: [0], ownedRods: [0],
+    baitCounts: { 0: 10, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
+    bag: [],
+    caughtSpecies: []
+  };
+  world = data.world;
+  otherPlayers = data.allPlayers;
+  delete otherPlayers[myPlayer.id];
+
+  document.getElementById("login-screen").style.display = "none";
+  updateOnlineCount();
+  updateUI();
+  renderShop();
+  requestAnimationFrame(gameLoop);
+});
+
+socket.on("playerJoined", (p) => { otherPlayers[p.id] = p; updateOnlineCount(); });
+socket.on("playerMoved", (p) => { if (otherPlayers[p.id]) otherPlayers[p.id] = p; });
+socket.on("playerLeft", (id) => { delete otherPlayers[id]; delete chatBubbles[id]; updateOnlineCount(); });
+
+socket.on("leaderboardUpdate", (list) => {
+  const lb = document.getElementById("leaderboard-list");
+  lb.innerHTML = "";
+  list.forEach((p, idx) => {
+    const isMax = p.lvl >= MAX_LEVEL;
+    const titleTag = p.title ? `[${p.title}] ` : (isMax ? `👑 ` : ``);
+    lb.innerHTML += `
+      <div class="lb-row ${isMax ? 'lb-max' : ''}">
+        <span>#${idx + 1} ${titleTag}${escapeHtml(p.name)}</span>
+        <span>${isMax ? 'MAX' : 'Lv.' + p.lvl}</span>
+      </div>`;
+  });
+});
+
+socket.on("chatMessage", (data) => {
+  const prefix = data.title ? `[${data.title}] ` : (data.lvl >= MAX_LEVEL ? "👑 " : "");
+  addChatLog(prefix + data.name, data.text, data.lvl >= MAX_LEVEL ? "#ffd700" : data.color);
+  chatBubbles[data.id] = { text: data.text, expiresAt: Date.now() + 5000 };
+});
+
+socket.on("worldUpdate", (serverWorld) => {
+  world = serverWorld;
+  const hrs = Math.floor(world.timeMinutes / 60);
+  const mins = world.timeMinutes % 60;
+  const timeStr = `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+  document.getElementById("ui-time").innerText = world.isNight ? `🌙 กลางคืน (${timeStr})` : `☀️ กลางวัน (${timeStr})`;
+
+  const wMap = { clear: '🌤️ แจ่มใส', rain: '🌧️ ฝนตก', fog: '🌫️ หมอกลง' };
+  document.getElementById("ui-weather").innerText = wMap[world.weather];
+
+  if (world.bossActive) {
+    document.getElementById("boss-alert").style.display = "block";
+    document.getElementById("boss-timer").innerText = "บอสกำลังอาละวาดในโซน 5!";
+  } else {
+    document.getElementById("boss-alert").style.display = "none";
+    const bMin = Math.floor(world.bossSecondsLeft / 60);
+    const bSec = world.bossSecondsLeft % 60;
+    document.getElementById("boss-timer").innerText = `บอสเกิดใน: ${bMin.toString().padStart(2, '0')}:${bSec.toString().padStart(2, '0')}`;
+  }
+});
+
+socket.on("serverAnnouncement", (data) => addLog(data.msg, data.color));
+function updateOnlineCount() { document.getElementById("online-count").innerText = Object.keys(otherPlayers).length + (myPlayer ? 1 : 0); }
+
+// ================= แชท =================
+function sendChatMessage(e) {
+  e.preventDefault();
+  const input = document.getElementById("chat-input");
+  if (input.value.trim() && myPlayer) socket.emit("sendChat", input.value.trim());
+  input.value = "";
+  input.blur();
+}
+function escapeHtml(str) { return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
+function addChatLog(sender, text, color) {
+  const log = document.getElementById("chat-log");
+  log.innerHTML += `<div class="log-entry"><strong style="color:${color}">[${escapeHtml(sender)}]:</strong> ${escapeHtml(text)}</div>`;
+  log.scrollTop = log.scrollHeight;
+}
+function addLog(msg, color = "#fff") {
+  const log = document.getElementById("chat-log");
+  log.innerHTML += `<div class="log-entry" style="color:${color}">${msg}</div>`;
+  log.scrollTop = log.scrollHeight;
+}
+
+// ================= แผนที่ 6 โซน =================
+const canvas = document.getElementById("game-canvas");
+const ctx = canvas.getContext("2d");
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
+window.addEventListener("keydown", e => {
+  const chatInput = document.getElementById("chat-input");
+  const isTyping = document.activeElement === chatInput || document.activeElement === document.getElementById("username-input");
+  if (e.key === "Enter" && myPlayer && !isTyping) { e.preventDefault(); chatInput.focus(); return; }
+  if (isTyping) return;
+
+  keys[e.key.toLowerCase()] = true;
+  if (e.code === "Space" && minigame.active) { e.preventDefault(); isReeling = true; }
+});
+window.addEventListener("keyup", e => {
+  keys[e.key.toLowerCase()] = false;
+  if (e.code === "Space") isReeling = false;
+});
+
+const ZONE_INFO = [
+  null,
+  { name: "โซน 1: บ่อน้ำจืด (Lv.1+)", reqLvl: 1, startPct: 0.00, endPct: 0.16 },
+  { name: "โซน 2: แม่น้ำ (Lv.10+)", reqLvl: 10, startPct: 0.16, endPct: 0.33 },
+  { name: "โซน 3: ชายฝั่งทะเล (Lv.25+)", reqLvl: 25, startPct: 0.33, endPct: 0.50 },
+  { name: "โซน 4: ทะเลเปิด (Lv.45+)", reqLvl: 45, startPct: 0.50, endPct: 0.67 },
+  { name: "โซน 5: ทะเลลึก (Lv.65+)", reqLvl: 65, startPct: 0.67, endPct: 0.84 },
+  { name: "โซน 6: ถ้ำใต้น้ำ / ซากเรือจม (Lv.85+)", reqLvl: 85, startPct: 0.84, endPct: 1.00 }
+];
+
+function getCurrentZone(x) {
+  const pct = x / canvas.width;
+  for (let z = 1; z <= 6; z++) {
+    if (pct >= ZONE_INFO[z].startPct && pct <= ZONE_INFO[z].endPct) return z;
+  }
+  return 1;
+}
+
+function updateMovement() {
+  if (!myPlayer || myPlayer.isFishing || minigame.active) return;
+  if (document.activeElement === document.getElementById("chat-input")) return;
+
+  const speed = BOATS[myPlayer.boat].speed;
+  let nextX = myPlayer.x;
+  let nextY = myPlayer.y;
+  let moved = false;
+
+  if (keys["w"] || keys["arrowup"]) { nextY -= speed; moved = true; }
+  if (keys["s"] || keys["arrowdown"]) { nextY += speed; moved = true; }
+  if (keys["a"] || keys["arrowleft"]) { nextX -= speed; moved = true; }
+  if (keys["d"] || keys["arrowright"]) { nextX += speed; moved = true; }
+
+  nextX = Math.max(25, Math.min(canvas.width - 25, nextX));
+  nextY = Math.max(80, Math.min(canvas.height - 80, nextY));
+
+  const targetZone = getCurrentZone(nextX);
+  if (myPlayer.lvl < ZONE_INFO[targetZone].reqLvl) return;
+  if (targetZone > BOATS[myPlayer.boat].maxZone) return;
+
+  if (moved) {
+    myPlayer.x = nextX;
+    myPlayer.y = nextY;
+    syncMyState();
+  }
+
+  document.getElementById("ui-zone").innerText = ZONE_INFO[targetZone].name;
+}
+
+function syncMyState() {
+  socket.emit("updateState", {
+    x: myPlayer.x, y: myPlayer.y,
+    boat: myPlayer.boat, rod: myPlayer.rod,
+    lvl: myPlayer.lvl, title: myPlayer.title,
+    isFishing: myPlayer.isFishing
+  });
+}
+
+// ================= ระบบตกปลา & เย่อเบ็ดสู้แรงปลา =================
+function toggleFishing() {
+  if (minigame.active) return;
+  const btn = document.getElementById("fish-btn");
+
+  if (myPlayer.isFishing) {
+    clearTimeout(fishingTimer);
+    myPlayer.isFishing = false;
+    btn.innerText = "🎣 หย่อนเบ็ดตกปลา";
+    btn.style.background = "#64ffda";
+    syncMyState();
+    return;
+  }
+
+  const currentZone = getCurrentZone(myPlayer.x);
+  const activeBait = BAITS[myPlayer.bait];
+  const baitQty = myPlayer.baitCounts[myPlayer.bait] || 0;
+
+  if (baitQty <= 0) {
+    addLog(`❌ เหยื่อ [${activeBait.name}] หมดแล้ว! กรุณาซื้อเพิ่มหรือเปลี่ยนเหยื่อในร้านค้า`, "#ff6b6b");
+    return;
+  }
+
+  if (!activeBait.allowedZones.includes(currentZone)) {
+    addLog(`⚠️ [${activeBait.name}] ใช้ได้เฉพาะใน ${activeBait.zoneDesc} เท่านั้น!`, "#ffa502");
+    return;
+  }
+
+  myPlayer.baitCounts[myPlayer.bait]--;
+  updateUI();
+
+  myPlayer.isFishing = true;
+  btn.innerText = "⏳ กำลังรอปลากินเหยื่อ...";
+  btn.style.background = "#ff9f43";
+  syncMyState();
+
+  let waitTime = Math.max(1000, 3200 - (RODS[myPlayer.rod].power * 150));
+  if (activeBait.biteSpeedBonus) waitTime = Math.round(waitTime * (1 - activeBait.biteSpeedBonus));
+
+  fishingTimer = setTimeout(startMinigame, waitTime);
+}
+
+function isDexComplete() {
+  const normalIds = FISH_DB.filter(f => f.rarity !== 'god').map(f => f.id);
+  return normalIds.every(id => myPlayer.caughtSpecies.includes(id));
+}
+
+function generateFishCombatStats(fish, weightMult) {
+  const rarityStats = {
+    common:    { pull: 0.6, stam: 100, interval: 2.0, zone: 50, snap: 3.0 },
+    uncommon:  { pull: 0.85, stam: 160, interval: 1.6, zone: 45, snap: 2.6 },
+    rare:      { pull: 1.0, stam: 240, interval: 1.3, zone: 40, snap: 2.3 },
+    legendary: { pull: 2.5, stam: 340, interval: 0.9, zone: 35, snap: 1.9 },
+    mythic:    { pull: 3.2, stam: 430, interval: 0.7, zone: 32, snap: 1.7 },
+    god:       { pull: 4.0, stam: 500, interval: 0.5, zone: 30, snap: 1.5 }
+  };
+
+  const base = rarityStats[fish.rarity] || rarityStats.common;
+  const rodBonusZone = RODS[myPlayer.rod].power * 0.8;
+
+  return {
+    pullStrength: +(base.pull * (0.85 + weightMult * 0.25)).toFixed(2),
+    stamina: Math.min(500, Math.round(base.stam * (0.9 + weightMult * 0.15))),
+    struggleInterval: Math.max(0.5, +(base.interval - (weightMult >= 2.5 ? 0.2 : 0)).toFixed(2)),
+    tensionZone: Math.min(55, Math.max(30, Math.round(base.zone + rodBonusZone))),
+    snapTime: base.snap
+  };
+}
+
+function startMinigame() {
+  if (!myPlayer.isFishing) return;
+  const currentZone = getCurrentZone(myPlayer.x);
+  const currentBait = BAITS[myPlayer.bait];
+  let selectedFish = null;
+
+  if (world.bossActive && currentZone === 5) {
+    const bossChance = 0.20 + (RODS[myPlayer.rod].power * 0.015);
+    if (Math.random() < bossChance) selectedFish = { ...BOSS_FISH };
+  }
+
+  if (!selectedFish) {
+    const validPool = FISH_DB.filter(f => {
+      if (f.zone !== currentZone) return false;
+      if (f.cond === "night" && !world.isNight) return false;
+      if (f.cond === "rain" && world.weather !== "rain") return false;
+      if (f.cond === "fog" && world.weather !== "fog") return false;
+      if (f.cond === "relic" && !myPlayer.hasRelic) return false;
+      if (f.cond === "ice_bait" && currentBait.id !== 6) return false;
+      if (f.cond === "god_seaking" && (myPlayer.lvl < 100 || world.seaKingCaughtBy)) return false;
+      if (f.cond === "god_leviathan" && (myPlayer.lvl < 100 || !isDexComplete())) return false;
+      return true;
+    });
+
+    let weightedPool = validPool.map(f => {
+      let w = f.weight;
+      if (currentBait.rarityBoost && currentBait.rarityBoost[f.rarity]) w *= currentBait.rarityBoost[f.rarity];
+      if (currentBait.favFishIds && currentBait.favFishIds.includes(f.id)) w *= 1.25;
+      if (f.favBaits && f.favBaits.includes(currentBait.id)) w *= 1.35;
+      if (currentBait.id === 6 && f.id === "l5") w *= 2.5;
+      if (f.cond === "fog") w = 2;
+      return { fish: f, w };
+    });
+
+    let totalW = weightedPool.reduce((s, item) => s + item.w, 0);
+    let r = Math.random() * totalW;
+    selectedFish = weightedPool[0].fish;
+    for (let item of weightedPool) {
+      if (r < item.w) { selectedFish = item.fish; break; }
+      r -= item.w;
+    }
+  }
+
+  let rSize = Math.random();
+  let chosenMod = SIZE_MODIFIERS[1];
+  for (let m of SIZE_MODIFIERS) {
+    if (rSize < m.chance) { chosenMod = m; break; }
+    rSize -= m.chance;
+  }
+
+  const baseKgMap = { common: 0.8, uncommon: 3.5, rare: 15.0, legendary: 65.0, mythic: 150.0, god: 500.0 };
+  const baseKg = (baseKgMap[selectedFish.rarity] || 5.0) * (0.9 + Math.random() * 0.2);
+  const finalWeight = (baseKg * chosenMod.weightMult).toFixed(2);
+  const finalPrice = Math.round(selectedFish.price * chosenMod.priceMult);
+  const combat = generateFishCombatStats(selectedFish, chosenMod.weightMult);
+
+  const fishInstance = {
+    ...selectedFish,
+    rolledSize: chosenMod.label,
+    sizeColor: chosenMod.color,
+    isTrophy: chosenMod.label === "ตำนาน (Trophy)",
+    finalWeight,
+    finalPrice,
+    combat
+  };
+
+  isReeling = false;
+  minigame.active = true;
+  minigame.targetFish = fishInstance;
+  minigame.pullStrength = combat.pullStrength;
+  minigame.stamina = combat.stamina;
+  minigame.maxStamina = combat.stamina;
+  minigame.struggleInterval = combat.struggleInterval;
+  minigame.struggleTimer = combat.struggleInterval;
+  minigame.tensionZone = combat.tensionZone;
+  minigame.snapTime = combat.snapTime;
+  minigame.dangerTimer = 0;
+
+  minigame.zoneStart = (100 - combat.tensionZone) / 2;
+  minigame.cursorPos = 50;
+
+  const targetEl = document.getElementById("target-zone");
+  targetEl.style.left = minigame.zoneStart + "%";
+  targetEl.style.width = combat.tensionZone + "%";
+
+  document.getElementById("minigame-title").innerText = `${fishInstance.rLabel} ติดเบ็ดแล้ว!`;
+  document.getElementById("minigame-sub").innerText =
+    `แรงดึง: ${combat.pullStrength}x | อึด: ${combat.stamina} | ทนโซนแดง: ${combat.snapTime}s`;
+  document.getElementById("minigame-box").style.display = "block";
+}
+
+function updateMinigame(dt) {
+  if (!minigame.active) return;
+
+  const reelPower = 26 + (RODS[myPlayer.rod].power * 2.2);
+  const fishDrag = 14 + (minigame.pullStrength * 9.5);
+
+  if (isReeling) minigame.cursorPos += reelPower * dt;
+  else minigame.cursorPos -= fishDrag * dt;
+
+  minigame.struggleTimer -= dt;
+  if (minigame.struggleTimer <= 0) {
+    minigame.struggleTimer = minigame.struggleInterval;
+    const burst = (Math.random() < 0.65 ? -1 : 1) * (8 + minigame.pullStrength * 4.5);
+    minigame.cursorPos += burst;
+  }
+
+  minigame.cursorPos = Math.max(0, Math.min(100, minigame.cursorPos));
+
+  const zoneEnd = minigame.zoneStart + minigame.tensionZone;
+  const inGreenZone = minigame.cursorPos >= minigame.zoneStart && minigame.cursorPos <= zoneEnd;
+
+  if (inGreenZone) {
+    const drainRate = 38 + (RODS[myPlayer.rod].power * 4.5);
+    minigame.stamina = Math.max(0, minigame.stamina - drainRate * dt);
+    minigame.dangerTimer = Math.max(0, minigame.dangerTimer - dt * 1.2);
+    document.getElementById("snap-warning").innerText = "✅ โซนปลอดภัย (กำลังลดแรงปลา)";
+    document.getElementById("snap-warning").style.color = "#2ed573";
+  } else {
+    minigame.dangerTimer += dt;
+    const isOverTension = minigame.cursorPos > zoneEnd;
+    document.getElementById("snap-warning").innerText = isOverTension
+      ? "🔥 สายตึงเกินไป! ปล่อยปุ่มด่วน!"
+      : "⚠️ สายหย่อนเกินไป! กดดึงด่วน!";
+    document.getElementById("snap-warning").style.color = "#ff4757";
+  }
+
+  document.getElementById("cursor-bar").style.left = `calc(${minigame.cursorPos}% - 4px)`;
+  document.getElementById("stamina-bar").style.width = `${(minigame.stamina / minigame.maxStamina) * 100}%`;
+  document.getElementById("stamina-text").innerText = `${Math.ceil(minigame.stamina)} / ${minigame.maxStamina}`;
+
+  const snapPct = Math.min(100, (minigame.dangerTimer / minigame.snapTime) * 100);
+  document.getElementById("snap-bar").style.width = `${snapPct}%`;
+  document.getElementById("snap-text").innerText = `${minigame.dangerTimer.toFixed(1)}s / ${minigame.snapTime.toFixed(1)}s`;
+
+  if (minigame.stamina <= 0) finishFishingMinigame(true);
+  else if (minigame.dangerTimer >= minigame.snapTime) finishFishingMinigame(false);
+}
+
+function finishFishingMinigame(success) {
+  minigame.active = false;
+  isReeling = false;
+  document.getElementById("minigame-box").style.display = "none";
+
+  const fish = minigame.targetFish;
+
+  if (success) {
+    myPlayer.bag.push(fish);
+    gainExp(fish.exp);
+
+    if (!fish.isBoss && !myPlayer.caughtSpecies.includes(fish.id)) {
+      myPlayer.caughtSpecies.push(fish.id);
+      addLog(`📖 ปลดล็อกข้อมูลใหม่ในสมุดปลา: [${fish.name}]!`, "#ffd700");
+
+      if (isDexComplete() && !myPlayer.ownedRods.includes(6)) {
+        myPlayer.ownedRods.push(6);
+        addLog(`🌌 [รางวัลสมุดปลา 100%] ปลดล็อก "เบ็ดเทพเลวีอาธาน" และสิทธิ์จับ "ปลาเลวีอาธาน" แล้ว!`, "#ffd700");
+      }
+    }
+
+    if (fish.id === "g1") {
+      myPlayer.title = "เทพแห่งท้องทะเล";
+      if (!myPlayer.ownedBoats.includes(5)) myPlayer.ownedBoats.push(5);
+      myPlayer.boat = 5;
+      socket.emit("catchSeaKing");
+    }
+    if (fish.id === "g2") {
+      if (!myPlayer.ownedRods.includes(6)) myPlayer.ownedRods.push(6);
+      myPlayer.rod = 6;
+      addLog(`🌟 คุณสวมใส่ "เบ็ดเทพเลวีอาธาน" เรียบร้อยแล้ว!`, "#ffd700");
+    }
+    if (fish.isBoss) socket.emit("bossCaught");
+
+    const expText = myPlayer.lvl >= MAX_LEVEL ? "MAX" : `+${fish.exp} EXP`;
+    if (fish.isTrophy) {
+      addLog(`🏆 [สถิติระดับตำนาน 1%!] ตกได้ [${fish.name}] ไซส์ ${fish.rolledSize} หนัก ${fish.finalWeight} kg มูลค่า ${fish.finalPrice.toLocaleString()} G!`, "#ffd700");
+    } else {
+      addLog(`🐟 เย่อสำเร็จ! ได้ [${fish.name}] ${fish.rolledSize} (${fish.finalWeight} kg) ราคา ${fish.finalPrice.toLocaleString()} G (${expText})`, fish.sizeColor || "#64ffda");
+    }
+  } else {
+    const reason = minigame.cursorPos > (minigame.zoneStart + minigame.tensionZone)
+      ? "💥 สายเบ็ดขาด! แรงดึงเกินขีดจำกัด"
+      : "💨 สายหย่อน! ปลาสะบัดหลุดไปได้";
+    addLog(`${reason} — [${fish.name}] (${fish.finalWeight} kg) หนีไปแล้ว...`, "#ff6b6b");
+  }
+
+  myPlayer.isFishing = false;
+  const btn = document.getElementById("fish-btn");
+  btn.innerText = "🎣 หย่อนเบ็ดตกปลา";
+  btn.style.background = "#64ffda";
+  syncMyState();
+  updateUI();
+}
+
+function gainExp(amount) {
+  if (myPlayer.lvl >= MAX_LEVEL) return;
+  myPlayer.exp += amount;
+  let reqExp = myPlayer.lvl * 100;
+
+  while (myPlayer.exp >= reqExp && myPlayer.lvl < MAX_LEVEL) {
+    myPlayer.exp -= reqExp;
+    myPlayer.lvl++;
+    reqExp = myPlayer.lvl * 100;
+    addLog(`🎊 เลเวลอัป! ตอนนี้คุณเลเวล ${myPlayer.lvl} แล้ว!`, "#ffd700");
+    if (myPlayer.lvl === MAX_LEVEL) { unlockMaxLevelRewards(); break; }
+  }
+  renderShop();
+  syncMyState();
+}
+
+function unlockMaxLevelRewards() {
+  myPlayer.lvl = MAX_LEVEL;
+  myPlayer.exp = 0;
+  if (!myPlayer.ownedBoats.includes(5)) myPlayer.ownedBoats.push(5);
+  if (!myPlayer.ownedRods.includes(5)) myPlayer.ownedRods.push(5);
+  myPlayer.boat = 5;
+  myPlayer.rod = 5;
+  addLog("👑 ยินดีด้วย! คุณบรรลุเลเวล 100 (MAX) ปลดล็อกสกินเรือจักรพรรดิ ตรีศูลโพไซดอน และสิทธิ์ล่าปลา God-tier แล้ว!", "#ffd700");
+  renderShop();
+  updateUI();
+  syncMyState();
+}
+
+function cheatMaxLevel() {
+  if (!myPlayer) return;
+  if (myPlayer.lvl < MAX_LEVEL) unlockMaxLevelRewards();
+  FISH_DB.filter(f => f.rarity !== 'god').forEach(f => {
+    if (!myPlayer.caughtSpecies.includes(f.id)) myPlayer.caughtSpecies.push(f.id);
+  });
+  if (!myPlayer.ownedRods.includes(6)) myPlayer.ownedRods.push(6);
+  BAITS.forEach(b => myPlayer.baitCounts[b.id] = 99);
+  myPlayer.hasRelic = true;
+  updateUI();
+  renderShop();
+  addLog("✨ [โหมดทดสอบ] ปลดล็อก Lv.100 + สมุดปลา 100% + เหยื่อทุกชนิด 99 ชิ้น + เข็มทิศซากเรือเรียบร้อย!", "#ffd700");
+}
+
+// ================= กระเป๋า สมุดสะสมปลา & ร้านค้า =================
+function openModal(id) {
+  closeModals();
+  document.getElementById(id).style.display = "block";
+  if (id === "bag-modal") renderBag();
+  if (id === "dex-modal") renderDex();
+  if (id === "shop-modal") renderShop();
+}
+function closeModals() { document.querySelectorAll(".modal").forEach(m => m.style.display = "none"); }
+
+function renderBag() {
+  const list = document.getElementById("bag-list");
+  list.innerHTML = myPlayer.bag.length === 0 ? "<p style='color:#8892b0'>ไม่มีปลาในกระเป๋า</p>" : "";
+  myPlayer.bag.forEach(fish => {
+    const trophyBorder = fish.isTrophy ? "border: 1px solid #ffd700;" : "";
+    list.innerHTML += `
+      <div class="item-row" style="${trophyBorder}">
+        <span>
+          <span class="r-${fish.rarity}">[${fish.rLabel}]</span> 
+          <b>${fish.name}</b> 
+          <span style="color:${fish.sizeColor || '#fff'}">[${fish.rolledSize}]</span>
+          <span style="color:#8892b0; font-size:11px;">(${fish.finalWeight} kg)</span>
+        </span>
+        <span class="gold">${(fish.finalPrice || fish.price).toLocaleString()} G</span>
+      </div>`;
+  });
+}
+
+function sellAllFish() {
+  if (myPlayer.bag.length === 0) return;
+  const total = myPlayer.bag.reduce((s, f) => s + (f.finalPrice || f.price), 0);
+  myPlayer.money += total;
+  addLog(`💰 ขายปลา ${myPlayer.bag.length} ตัว ได้เงิน ${total.toLocaleString()} G`, "#ffd700");
+  myPlayer.bag = [];
+  renderBag();
+  updateUI();
+}
+
+function renderDex() {
+  const grid = document.getElementById("dex-grid");
+  grid.innerHTML = "";
+  document.getElementById("dex-modal-progress").innerText = `${myPlayer.caughtSpecies.length}/${FISH_DB.length}`;
+
+  FISH_DB.forEach(f => {
+    const unlocked = myPlayer.caughtSpecies.includes(f.id);
+    grid.innerHTML += `
+      <div class="dex-card ${unlocked ? '' : 'dex-locked'}">
+        <div class="r-${f.rarity}"><b>${unlocked ? f.name : '??? (ยังไม่ค้นพบ)'}</b></div>
+        <div style="color:#8892b0;">${f.rLabel} | โซน ${f.zone} (${f.subZone})</div>
+        <div style="color:#ffd700;">ราคาพื้นฐาน: ${f.price.toLocaleString()} G</div>
+        ${f.condText ? `<div style="color:#ff6b6b;">เงื่อนไข: ${f.condText}</div>` : ''}
+      </div>`;
+  });
+}
+
+function renderShop() {
+  const relicEl = document.getElementById("shop-relics");
+  relicEl.innerHTML = `
+    <div class="item-row exclusive-item">
+      <div>
+        <strong>🧭 เข็มทิศซากเรือโบราณ</strong> <span style="font-size:11px; color:#8892b0;">(ปลดล็อก "ปลาโบราณ" ในโซน 6)</span>
+      </div>
+      ${myPlayer.hasRelic 
+        ? `<button disabled>ครอบครองแล้ว</button>` 
+        : `<button onclick="buyRelic()" ${myPlayer.money < 5000 ? 'disabled' : ''}>ซื้อ (5,000 G)</button>`}
+    </div>`;
+
+  const baitContainer = document.getElementById("shop-baits");
+  baitContainer.innerHTML = "";
+  BAITS.forEach(b => {
+    const qty = myPlayer.baitCounts[b.id] || 0;
+    const isEquipped = myPlayer.bait === b.id;
+
+    baitContainer.innerHTML += `
+      <div class="item-row" style="flex-direction: column; align-items: stretch; gap: 5px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <strong>${b.name}</strong> <span style="color:#ffd700;">(${b.price} G/ชิ้น)</span>
+            <span style="background:#233554; padding:2px 6px; border-radius:4px; font-size:11px; margin-left:4px;">มีอยู่: <b>${qty}</b> ชิ้น</span>
+          </div>
+          <div style="display:flex; gap:4px;">
+            <button onclick="buyBait(${b.id}, 1)" ${myPlayer.money < b.price ? 'disabled' : ''}>+1</button>
+            <button onclick="buyBait(${b.id}, 10)" ${myPlayer.money < b.price * 10 ? 'disabled' : ''}>+10 (${b.price * 10}G)</button>
+            ${isEquipped 
+              ? `<button disabled style="background:#2ed573; color:#0a192f;">กำลังใช้</button>` 
+              : `<button onclick="equipBait(${b.id})" ${qty <= 0 ? 'disabled' : ''}>เลือกใช้</button>`}
+          </div>
+        </div>
+        <div style="font-size:11px; color:#8892b0; display:flex; justify-content:space-between; flex-wrap:wrap;">
+          <span>🐟 ชอบ: ${b.targetDesc} | 📍 โซน: ${b.zoneDesc}</span>
+          <span style="color:#64ffda;">✨ ${b.bonusDesc}</span>
+        </div>
+      </div>`;
+  });
+
+  renderShopCategory("shop-boats", BOATS, "ownedBoats", "boat");
+  renderShopCategory("shop-rods", RODS, "ownedRods", "rod");
+}
+
+function buyBait(id, amount) {
+  const bait = BAITS[id];
+  const totalCost = bait.price * amount;
+  if (myPlayer.money < totalCost) return;
+
+  myPlayer.money -= totalCost;
+  myPlayer.baitCounts[id] = (myPlayer.baitCounts[id] || 0) + amount;
+  if ((myPlayer.baitCounts[myPlayer.bait] || 0) <= 0) myPlayer.bait = id;
+  renderShop();
+  updateUI();
+}
+
+function equipBait(id) {
+  if ((myPlayer.baitCounts[id] || 0) <= 0) return;
+  myPlayer.bait = id;
+  renderShop();
+  updateUI();
+}
+
+function buyRelic() {
+  if (myPlayer.money < 5000 || myPlayer.hasRelic) return;
+  myPlayer.money -= 5000;
+  myPlayer.hasRelic = true;
+  addLog(`🧭 ซื้อ "เข็มทิศซากเรือโบราณ" สำเร็จ! สามารถตกปลาโบราณในโซน 6 ได้แล้ว`, "#ffd700");
+  renderShop();
+  updateUI();
+}
+
+function renderShopCategory(elId, items, ownedKey, equipKey) {
+  const container = document.getElementById(elId);
+  container.innerHTML = "";
+  items.forEach(item => {
+    const isOwned = myPlayer[ownedKey].includes(item.id);
+    const isEquipped = myPlayer[equipKey] === item.id;
+    const isLocked = myPlayer.lvl < item.reqLvl || (item.requiresFullDex && !isDexComplete());
+
+    let btn = "";
+    if (isEquipped) btn = `<button disabled>กำลังใช้งาน</button>`;
+    else if (isOwned) btn = `<button onclick="equipItem('${equipKey}', ${item.id})">สวมใส่</button>`;
+    else if (item.requiresFullDex && !isDexComplete()) btn = `<button disabled>🔒 สมุดปลา 100%</button>`;
+    else if (isLocked) btn = `<button disabled>🔒 Lv.${item.reqLvl}</button>`;
+    else btn = `<button onclick="buyItem('${ownedKey}', '${equipKey}', ${item.id}, ${item.price})" ${myPlayer.money < item.price ? 'disabled' : ''}>ซื้อ (${item.price.toLocaleString()} G)</button>`;
+
+    const rowClass = item.exclusive ? "item-row exclusive-item" : "item-row";
+    container.innerHTML += `<div class="${rowClass}"><div><strong>${item.name}</strong> <span style="font-size:11px; color:#8892b0;">(Lv.${item.reqLvl})</span></div>${btn}</div>`;
+  });
+}
+
+function buyItem(ownedKey, equipKey, id, price) {
+  if (myPlayer.money < price) return;
+  myPlayer.money -= price;
+  myPlayer[ownedKey].push(id);
+  myPlayer[equipKey] = id;
+  renderShop();
+  updateUI();
+  syncMyState();
+}
+
+function equipItem(equipKey, id) {
+  myPlayer[equipKey] = id;
+  renderShop();
+  updateUI();
+  syncMyState();
+}
+
+function updateUI() {
+  const isMax = myPlayer.lvl >= MAX_LEVEL;
+  const titleText = myPlayer.title ? `[${myPlayer.title}] ` : (isMax ? `👑 [เจ้าสมุทร] ` : ``);
+  document.getElementById("ui-name").innerHTML = (isMax || myPlayer.title)
+    ? `<span style="color:#ffd700;">${titleText}${escapeHtml(myPlayer.name)}</span>`
+    : `กัปตัน: ${escapeHtml(myPlayer.name)}`;
+  document.getElementById("ui-lvl").innerText = isMax ? "100 (MAX)" : myPlayer.lvl;
+  document.getElementById("ui-exp").innerText = isMax ? "MAX" : `${myPlayer.exp}/${myPlayer.lvl * 100}`;
+  document.getElementById("ui-money").innerText = myPlayer.money.toLocaleString();
+  document.getElementById("bag-count").innerText = myPlayer.bag.length;
+  document.getElementById("dex-count").innerText = myPlayer.caughtSpecies.length;
+  document.getElementById("dex-total").innerText = FISH_DB.length;
+  document.getElementById("ui-boat").innerText = BOATS[myPlayer.boat].name;
+  document.getElementById("ui-rod").innerText = RODS[myPlayer.rod].name;
+
+  const activeBait = BAITS[myPlayer.bait];
+  const activeQty = myPlayer.baitCounts[myPlayer.bait] || 0;
+  document.getElementById("ui-bait").innerText = `${activeBait.name} (${activeQty} ชิ้น)`;
+
+  document.getElementById("ui-relic").innerHTML = myPlayer.hasRelic
+    ? `<span style="color:#2ed573;">✅ มีเข็มทิศซากเรือ</span>`
+    : `<span style="color:#ff6b6b;">❌ ยังไม่มีเข็มทิศซากเรือ</span>`;
+}
+
+// ================= วาดกราฟิก 6 โซน + เอฟเฟกต์ฝน/หมอก/ออร่า =================
+function gameLoop(now = performance.now()) {
+  const dt = Math.min(0.1, (now - lastFrameTime) / 1000);
+  lastFrameTime = now;
+
+  updateMovement();
+  updateMinigame(dt);
+  drawWorld();
+  requestAnimationFrame(gameLoop);
+}
+
+function spawnAuraParticles(x, y) {
+  if (Math.random() < 0.45) {
+    particles.push({
+      x: x + (Math.random() - 0.5) * 55,
+      y: y + (Math.random() - 0.5) * 35,
+      vy: -0.6 - Math.random() * 0.8,
+      size: 2 + Math.random() * 2.5,
+      alpha: 1
+    });
+  }
+}
+
+function updateAndDrawParticles() {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.y += p.vy;
+    p.alpha -= 0.025;
+    if (p.alpha <= 0) { particles.splice(i, 1); continue; }
+    ctx.save();
+    ctx.fillStyle = `rgba(255, 215, 0, ${p.alpha})`;
+    ctx.shadowColor = "#ffd700";
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawWorld() {
+  const w = canvas.width;
+  const h = canvas.height;
+
+  const zoneColorsDay = ["#55efc4", "#00cec9", "#48dbfb", "#0abde3", "#1e3799", "#3c1874"];
+  const zoneColorsNight = ["#1b4332", "#081c15", "#132a46", "#0c1c30", "#050d17", "#1a0b2e"];
+  const palette = world.isNight ? zoneColorsNight : zoneColorsDay;
+
+  for (let z = 1; z <= 6; z++) {
+    const x1 = w * ZONE_INFO[z].startPct;
+    const x2 = w * ZONE_INFO[z].endPct;
+    ctx.fillStyle = palette[z - 1];
+    ctx.fillRect(x1, 0, x2 - x1, h);
+
+    if (z > 1) {
+      ctx.strokeStyle = z === 6 ? "rgba(255, 215, 0, 0.6)" : "rgba(255, 255, 255, 0.2)";
+      ctx.setLineDash([8, 8]);
+      ctx.beginPath();
+      ctx.moveTo(x1, 0); ctx.lineTo(x1, h);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.font = "bold 11px sans-serif";
+    ctx.fillText(`โซน ${z} (Lv.${ZONE_INFO[z].reqLvl}+)`, x1 + 6, 95);
+  }
+
+  if (world.bossActive) {
+    ctx.font = "54px sans-serif";
+    ctx.fillText("🐙", world.bossX - 27, world.bossY + 18);
+    ctx.fillStyle = "#ff4757";
+    ctx.font = "bold 12px sans-serif";
+    ctx.fillText("BOSS: ปลาหมึกยักษ์", world.bossX - 50, world.bossY - 32);
+  }
+
+  Object.values(otherPlayers).forEach(p => {
+    drawBoat(p.id, p.x, p.y, p.name, p.lvl, p.title, p.color, p.boat, p.rod, p.isFishing);
+  });
+
+  if (myPlayer) {
+    drawBoat(myPlayer.id, myPlayer.x, myPlayer.y, myPlayer.name, myPlayer.lvl, myPlayer.title, "#64ffda", myPlayer.boat, myPlayer.rod, myPlayer.isFishing);
+  }
+
+  updateAndDrawParticles();
+
+  if (world.weather === 'rain') {
+    ctx.strokeStyle = "rgba(174, 214, 241, 0.45)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let i = 0; i < 80; i++) {
+      const rx = Math.random() * w;
+      const ry = Math.random() * h;
+      ctx.moveTo(rx, ry);
+      ctx.lineTo(rx - 6, ry + 18);
+    }
+    ctx.stroke();
+  } else if (world.weather === 'fog') {
+    ctx.fillStyle = "rgba(220, 230, 240, 0.22)";
+    ctx.fillRect(0, 0, w, h);
+  }
+}
+
+function drawBoat(playerId, x, y, rawName, lvl, title, defaultColor, boatId, rodId, isFishing) {
+  const isMax = lvl >= MAX_LEVEL;
+  const hasGoldBoat = boatId === 5;
+  const hasGodRod = rodId >= 5;
+
+  if (isMax) spawnAuraParticles(x, y);
+
+  ctx.save();
+  if (isMax || hasGoldBoat) {
+    ctx.shadowColor = "#ffd700";
+    ctx.shadowBlur = 16;
+  }
+
+  ctx.fillStyle = hasGoldBoat ? "#ffd700" : defaultColor;
+  ctx.beginPath();
+  ctx.ellipse(x, y, hasGoldBoat ? 28 : 23, hasGoldBoat ? 13 : 11, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  if (hasGoldBoat) {
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  if (isFishing) {
+    ctx.strokeStyle = hasGodRod ? "#ffd700" : "#fff";
+    ctx.lineWidth = hasGodRod ? 3 : 2;
+    ctx.beginPath();
+    ctx.moveTo(x + 20, y);
+    ctx.lineTo(x + 42, y + 22);
+    ctx.stroke();
+
+    ctx.fillStyle = hasGodRod ? "#00f2fe" : "#ff4757";
+    ctx.beginPath();
+    ctx.arc(x + 42, y + 22, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.textAlign = "center";
+  if (isMax || title) {
+    const badge = title ? `🌟 [${title}]` : `👑 [เจ้าสมุทร]`;
+    ctx.fillStyle = "#ffd700";
+    ctx.font = "bold 12px sans-serif";
+    ctx.fillText(`${badge} ${rawName} (Lv.${lvl})`, x, y - 22);
+  } else {
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 12px sans-serif";
+    ctx.fillText(`${rawName} (Lv.${lvl})`, x, y - 18);
+  }
+  ctx.restore();
+
+  const bubble = chatBubbles[playerId];
+  if (bubble) {
+    if (Date.now() < bubble.expiresAt) {
+      ctx.font = "12px sans-serif";
+      const textWidth = ctx.measureText(bubble.text).width;
+      const boxW = textWidth + 18;
+      const boxH = 24;
+      const boxX = x - boxW / 2;
+      const boxY = y - 62;
+
+      ctx.fillStyle = isMax ? "rgba(255, 248, 220, 0.96)" : "rgba(255, 255, 255, 0.95)";
+      ctx.beginPath();
+      ctx.roundRect(boxX, boxY, boxW, boxH, 8);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(x - 5, boxY + boxH);
+      ctx.lineTo(x + 5, boxY + boxH);
+      ctx.lineTo(x, boxY + boxH + 6);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = "#0a192f";
+      ctx.textAlign = "center";
+      ctx.fillText(bubble.text, x, boxY + 16);
+    } else {
+      delete chatBubbles[playerId];
+    }
+  }
+  ctx.textAlign = "left";
+}
+</script>
+</body>
+</html>
