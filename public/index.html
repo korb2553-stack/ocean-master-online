@@ -3,121 +3,231 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Ocean Master Online - เกมตกปลาออนไลน์</title>
+<title>Ocean Master 3D Online - เกมตกปลาออนไลน์</title>
 <script src="/socket.io/socket.io.js"></script>
 <style>
-  * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-  body { background: #0a192f; color: #fff; overflow: hidden; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
-  
+  :root {
+    --glass-bg: rgba(13, 28, 52, 0.72);
+    --glass-border: rgba(100, 255, 218, 0.35);
+    --gold: #ffd700;
+    --cyan: #64ffda;
+  }
+  * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
+  body { background: #061121; color: #fff; overflow: hidden; user-select: none; -webkit-user-select: none; touch-action: none; }
+
+  /* หน้าจอ Login 3D Glass */
   #login-screen {
-    position: fixed; inset: 0; background: rgba(10, 25, 47, 0.96);
+    position: fixed; inset: 0;
+    background: radial-gradient(circle at 50% 30%, rgba(16, 48, 84, 0.92), rgba(5, 14, 28, 0.98));
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100;
   }
   #login-box {
-    background: #112240; padding: 28px; border-radius: 12px; border: 2px solid #64ffda;
+    background: linear-gradient(145deg, rgba(22, 46, 82, 0.9), rgba(10, 22, 42, 0.95));
+    padding: 30px 26px; border-radius: 20px;
+    border: 1px solid rgba(100, 255, 218, 0.5);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75), inset 0 1px 1px rgba(255, 255, 255, 0.25);
     text-align: center; width: 90%; max-width: 360px;
   }
   #login-box input {
-    width: 100%; padding: 12px; margin: 15px 0; border-radius: 6px; border: 1px solid #233554;
-    background: #0a192f; color: #fff; font-size: 16px; text-align: center;
+    width: 100%; padding: 13px; margin: 16px 0 10px; border-radius: 12px;
+    border: 1px solid rgba(100, 255, 218, 0.3);
+    background: rgba(5, 14, 28, 0.85); color: #fff; font-size: 16px; text-align: center;
+    box-shadow: inset 0 3px 8px rgba(0,0,0,0.6); outline: none;
   }
-  button {
-    background: #64ffda; color: #0a192f; border: none; padding: 8px 12px;
-    font-size: 13px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.15s;
-  }
-  button:hover { background: #4cd6b5; }
-  button:active { transform: scale(0.96); }
-  button:disabled { background: #555; color: #888; cursor: not-allowed; }
-  .error { color: #ff6b6b; font-size: 13px; margin-bottom: 10px; min-height: 20px; }
+  #login-box input:focus { border-color: var(--cyan); box-shadow: inset 0 3px 8px rgba(0,0,0,0.6), 0 0 12px rgba(100,255,218,0.3); }
 
+  /* ปุ่มสไตล์ 3D นูนมีมิติ */
+  button {
+    background: linear-gradient(180deg, #7efce0 0%, #3dd9b6 100%);
+    color: #061826; border: none; padding: 9px 13px;
+    font-size: 12.5px; font-weight: 800; border-radius: 12px; cursor: pointer;
+    box-shadow: 0 4px 0 #1b8a70, 0 8px 16px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.7);
+    transition: transform 0.08s, box-shadow 0.08s, filter 0.15s;
+  }
+  button:hover { filter: brightness(1.06); }
+  button:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #1b8a70, 0 3px 6px rgba(0, 0, 0, 0.4);
+  }
+  button:disabled {
+    background: linear-gradient(180deg, #4b5563, #374151); color: #9ca3af;
+    box-shadow: 0 3px 0 #1f2937; cursor: not-allowed; transform: none;
+  }
+  .btn-gold {
+    background: linear-gradient(180deg, #ffe866 0%, #f5b700 100%);
+    box-shadow: 0 4px 0 #a87900, 0 8px 16px rgba(0,0,0,0.45), inset 0 1px 1px rgba(255,255,255,0.8);
+  }
+  .btn-gold:active { box-shadow: 0 1px 0 #a87900; }
+  .btn-red {
+    background: linear-gradient(180deg, #ff7685 0%, #e03144 100%); color: #fff;
+    box-shadow: 0 4px 0 #8f1623, 0 8px 16px rgba(0,0,0,0.45), inset 0 1px 1px rgba(255,255,255,0.5);
+  }
+  .btn-red:active { box-shadow: 0 1px 0 #8f1623; }
+  .btn-blue {
+    background: linear-gradient(180deg, #8ec5fc 0%, #4b91f1 100%); color: #061826;
+    box-shadow: 0 4px 0 #2558a3, 0 8px 16px rgba(0,0,0,0.45), inset 0 1px 1px rgba(255,255,255,0.6);
+  }
+  .btn-blue:active { box-shadow: 0 1px 0 #2558a3; }
+
+  .error { color: #ff6b6b; font-size: 13px; margin-bottom: 10px; min-height: 20px; }
   #game-canvas { display: block; width: 100vw; height: 100vh; }
 
+  /* UI ด้านบนแบบ 3D Frosted Glass */
   #top-bar {
-    position: fixed; top: 8px; left: 8px; right: 8px;
-    display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; pointer-events: none; flex-wrap: wrap;
+    position: fixed; top: 10px; left: 10px; right: 10px;
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
+    pointer-events: none; flex-wrap: wrap; z-index: 15;
   }
   .panel {
-    background: rgba(17, 34, 64, 0.9); padding: 8px 12px; border-radius: 8px;
-    border: 1px solid #233554; pointer-events: auto;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    padding: 9px 14px; border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.22);
+    pointer-events: auto;
   }
-  .stat { margin-right: 8px; font-weight: bold; font-size: 13px; }
+  .stat { margin-right: 8px; font-weight: 700; font-size: 13px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
   .gold { color: #ffd700; }
   .lvl { color: #64ffda; }
 
-  #boss-alert { color: #ff4757; font-weight: bold; animation: pulse 1s infinite; display: none; font-size: 12px; }
-  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+  #boss-alert { color: #ff5e6c; font-weight: 800; animation: pulse 1s infinite; display: none; font-size: 12px; text-shadow: 0 0 8px rgba(255,71,87,0.8); }
+  @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.03); } 100% { opacity: 1; transform: scale(1); } }
 
-  /* กระดานอันดับ */
+  /* กระดานอันดับ 3D */
   #leaderboard-panel {
-    position: fixed; top: 92px; right: 8px; width: 210px;
-    background: rgba(17, 34, 64, 0.88); border: 1px solid #233554;
-    border-radius: 8px; padding: 8px 10px; font-size: 11px;
+    position: fixed; top: 96px; right: 10px; width: 205px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.18);
+    border-radius: 14px; padding: 9px 12px; font-size: 11px; z-index: 14;
   }
-  #leaderboard-panel h4 { color: #ffd700; border-bottom: 1px solid #233554; padding-bottom: 4px; margin-bottom: 5px; }
+  #leaderboard-panel h4 { color: #ffd700; border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 5px; margin-bottom: 6px; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
   .lb-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
   .lb-max { color: #ffd700; font-weight: bold; }
 
-  /* มินิเกมเย่อเบ็ดสู้แรงปลา */
+  /* มินิเกมเย่อเบ็ด 3D */
   #minigame-box {
     position: fixed; top: 42%; left: 50%; transform: translate(-50%, -50%);
-    background: rgba(17, 34, 64, 0.97); border: 2px solid #ffd700; border-radius: 12px;
-    padding: 18px; width: 92%; max-width: 390px; text-align: center; display: none; z-index: 40;
+    background: linear-gradient(160deg, rgba(20, 40, 74, 0.96), rgba(9, 20, 40, 0.98));
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border: 2px solid #ffd700; border-radius: 20px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 25px rgba(255, 215, 0, 0.25), inset 0 1px 2px rgba(255,255,255,0.3);
+    padding: 20px; width: 92%; max-width: 390px; text-align: center; display: none; z-index: 40;
   }
   #bar-container {
-    width: 100%; height: 30px; background: #ff4757; border-radius: 15px;
-    position: relative; overflow: hidden; margin: 12px 0 8px; border: 1px solid #fff;
+    width: 100%; height: 32px;
+    background: linear-gradient(180deg, #b32432, #ff4757);
+    border-radius: 16px; position: relative; overflow: hidden; margin: 12px 0 8px;
+    border: 2px solid rgba(255,255,255,0.8);
+    box-shadow: inset 0 4px 10px rgba(0,0,0,0.6);
   }
-  #target-zone { position: absolute; top: 0; bottom: 0; background: #2ed573; border-left: 2px solid #fff; border-right: 2px solid #fff; }
-  #cursor-bar { position: absolute; top: 0; bottom: 0; width: 8px; background: #fff; box-shadow: 0 0 8px #000; left: 50%; }
+  #target-zone {
+    position: absolute; top: 0; bottom: 0;
+    background: linear-gradient(180deg, #55efc4, #10ac84);
+    border-left: 2px solid #fff; border-right: 2px solid #fff;
+    box-shadow: 0 0 12px rgba(46, 213, 115, 0.8);
+  }
+  #cursor-bar {
+    position: absolute; top: -2px; bottom: -2px; width: 10px;
+    background: linear-gradient(90deg, #dfe6e9, #ffffff, #b2bec3);
+    border-radius: 4px; box-shadow: 0 0 10px #fff, 0 0 4px #000; left: 50%;
+  }
 
-  /* ปุ่มควบคุมบนมือถือ/iOS */
-  #mobile-dpad {
-    position: fixed; bottom: 75px; right: 14px;
-    display: grid; grid-template-columns: repeat(3, 44px); gap: 5px; z-index: 30; opacity: 0.85;
+  /* ================= ปุ่มเดินวงกลม (3D Virtual Joystick) ฝั่งซ้าย ================= */
+  #joystick-zone {
+    position: fixed; bottom: 82px; left: 22px;
+    width: 126px; height: 126px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.14), rgba(10, 25, 47, 0.65));
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border: 2px solid rgba(100, 255, 218, 0.45);
+    box-shadow:
+      0 12px 28px rgba(0, 0, 0, 0.65),
+      inset 0 4px 12px rgba(0, 0, 0, 0.7),
+      inset 0 -2px 6px rgba(100, 255, 218, 0.25);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 35; touch-action: none;
   }
-  #mobile-dpad button { height: 44px; font-size: 16px; padding: 0; background: rgba(17, 34, 64, 0.9); color: #64ffda; border: 1px solid #64ffda; }
+  /* สัญลักษณ์ทิศทางจางๆ บนฐานจอยสติ๊ก */
+  #joystick-zone::before {
+    content: "▲\A◀   •   ▶\A▼";
+    white-space: pre; text-align: center; line-height: 32px;
+    font-size: 11px; color: rgba(100, 255, 218, 0.32); pointer-events: none;
+  }
+  #joystick-knob {
+    position: absolute; width: 52px; height: 52px; border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, #a8ffea 0%, #3dd9b6 55%, #136f5a 100%);
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    box-shadow:
+      0 8px 16px rgba(0, 0, 0, 0.65),
+      0 0 14px rgba(100, 255, 218, 0.5),
+      inset 0 3px 6px rgba(255, 255, 255, 0.85);
+    pointer-events: none;
+    transform: translate(0px, 0px);
+    transition: transform 0.06s ease-out;
+  }
+
+  /* กล่องแชทย้ายมาฝั่งขวา (เหนือปุ่มควบคุม) เพื่อไม่ให้ทับปุ่มเดินวงกลมฝั่งซ้าย */
+  #chat-wrapper {
+    position: fixed; bottom: 78px; right: 10px; width: 255px; max-width: 52vw;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.15);
+    border-radius: 14px; display: flex; flex-direction: column; overflow: hidden; z-index: 20;
+  }
+  #chat-log { height: 95px; padding: 7px 9px; overflow-y: auto; font-size: 11px; user-select: text; word-wrap: break-word; }
+  .log-entry { margin-bottom: 3px; line-height: 1.35; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+  #chat-form { display: flex; border-top: 1px solid rgba(255,255,255,0.12); background: rgba(6, 15, 30, 0.75); }
+  #chat-input { flex: 1; background: transparent; border: none; color: #fff; padding: 7px 9px; font-size: 12px; outline: none; }
+  #chat-send-btn { border-radius: 0; box-shadow: none; padding: 0 12px; }
 
   #bottom-controls {
     position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
-    display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; width: 98%; max-width: 780px; z-index: 25;
+    display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; width: 98%; max-width: 780px; z-index: 25;
   }
 
+  /* หน้าต่าง Modal แบบ 3D Glass */
   .modal {
     position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    background: #112240; border: 2px solid #64ffda; border-radius: 12px;
-    padding: 16px; width: 94%; max-width: 540px; max-height: 82vh; overflow-y: auto;
+    background: linear-gradient(165deg, rgba(20, 40, 75, 0.96), rgba(8, 18, 36, 0.98));
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1.5px solid rgba(100, 255, 218, 0.5); border-radius: 20px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), inset 0 1px 2px rgba(255,255,255,0.25);
+    padding: 18px; width: 94%; max-width: 540px; max-height: 82vh; overflow-y: auto;
     display: none; z-index: 50;
   }
-  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #233554; padding-bottom: 8px; }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 8px; }
   .item-row {
     display: flex; justify-content: space-between; align-items: center;
-    background: #0a192f; padding: 8px 10px; margin-bottom: 6px; border-radius: 6px; font-size: 12px;
+    background: rgba(6, 15, 30, 0.75); padding: 9px 12px; margin-bottom: 7px; border-radius: 12px; font-size: 12px;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.4);
   }
-  .exclusive-item { border: 1px solid #ffd700; background: linear-gradient(90deg, #1a1a00, #0a192f); }
-  .close-btn { background: #ff4757; color: white; padding: 4px 10px; }
+  .exclusive-item { border: 1px solid rgba(255, 215, 0, 0.6); background: linear-gradient(90deg, rgba(60, 50, 5, 0.65), rgba(10, 25, 47, 0.85)); }
 
   .r-common { color: #2ed573; }
-  .r-uncommon { color: #1e90ff; }
-  .r-rare { color: #a55eea; }
-  .r-legendary { color: #ffa502; }
-  .r-mythic { color: #ff4757; }
-  .r-god { color: #ffd700; text-shadow: 0 0 6px #ffd700; }
+  .r-uncommon { color: #38bdf8; }
+  .r-rare { color: #c084fc; }
+  .r-legendary { color: #fb923c; }
+  .r-mythic { color: #f87171; }
+  .r-god { color: #ffd700; text-shadow: 0 0 8px rgba(255, 215, 0, 0.8); }
 
-  .dex-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
-  .dex-card { background: #0a192f; padding: 8px; border-radius: 6px; border: 1px solid #233554; font-size: 11px; }
-  .dex-locked { opacity: 0.45; }
-
-  /* แชท */
-  #chat-wrapper {
-    position: fixed; bottom: 75px; left: 10px; width: 280px; max-width: 60vw;
-    background: rgba(10, 25, 47, 0.85); border: 1px solid #233554;
-    border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; z-index: 20;
+  .dex-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; }
+  .dex-card {
+    background: rgba(6, 15, 30, 0.8); padding: 9px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.12); font-size: 11px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   }
-  #chat-log { height: 110px; padding: 6px 8px; overflow-y: auto; font-size: 11px; user-select: text; word-wrap: break-word; }
-  .log-entry { margin-bottom: 3px; line-height: 1.3; }
-  #chat-form { display: flex; border-top: 1px solid #233554; background: #112240; }
-  #chat-input { flex: 1; background: transparent; border: none; color: #fff; padding: 6px 8px; font-size: 12px; outline: none; }
-  #chat-send-btn { background: #64ffda; color: #0a192f; border: none; padding: 0 10px; font-size: 12px; font-weight: bold; border-radius: 0; }
+  .dex-locked { opacity: 0.42; }
+
+  @media (max-width: 600px) {
+    #leaderboard-panel { width: 165px; font-size: 10px; top: 106px; }
+    #chat-wrapper { width: 195px; bottom: 82px; }
+    #joystick-zone { width: 114px; height: 114px; bottom: 82px; left: 14px; }
+    #joystick-knob { width: 46px; height: 46px; }
+  }
 </style>
 </head>
 <body>
@@ -125,11 +235,12 @@
   <!-- หน้าจอตั้งชื่อ -->
   <div id="login-screen">
     <div id="login-box">
-      <h2 style="color: #64ffda; margin-bottom: 8px;">🌊 Ocean Master Online</h2>
-      <p style="font-size: 13px; color: #8892b0;">ตั้งชื่อตัวละคร (ขั้นต่ำ 3 ตัว ห้ามอักษรพิเศษ)</p>
+      <div style="font-size: 40px; margin-bottom: 4px; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.6));">🛥️</div>
+      <h2 style="color: #64ffda; margin-bottom: 6px; text-shadow: 0 2px 10px rgba(100,255,218,0.4);">Ocean Master 3D</h2>
+      <p style="font-size: 13px; color: #94a3b8;">ตั้งชื่อกัปตัน (ขั้นต่ำ 3 ตัว ห้ามอักษรพิเศษ)</p>
       <input type="text" id="username-input" placeholder="กรอกชื่อกัปตัน..." maxlength="15">
       <div class="error" id="login-error"></div>
-      <button onclick="joinServer()" style="width:100%; padding:12px; font-size:15px;">เข้าสู่เซิร์ฟเวอร์</button>
+      <button onclick="joinServer()" style="width:100%; padding:13px; font-size:15px;">🌊 ออกเดินเรือ</button>
     </div>
   </div>
 
@@ -141,16 +252,16 @@
       <span class="stat" id="ui-name">กัปตัน: -</span>
       <span class="stat lvl">Lv.<span id="ui-lvl">1</span> (<span id="ui-exp">0/100</span>)</span>
       <span class="stat gold">💰 <span id="ui-money">50</span> G</span>
-      <span style="font-size:11px; color:#8892b0;">🟢 <span id="online-count">1</span></span>
+      <span style="font-size:11px; color:#94a3b8;">🟢 <span id="online-count">1</span></span>
     </div>
 
     <div class="panel" style="text-align: center;">
       <div style="font-size:12px;">
         <span id="ui-time">☀️ กลางวัน (08:00)</span> | 
-        <span id="ui-weather" style="color:#70a1ff;">🌤️ แจ่มใส</span>
+        <span id="ui-weather" style="color:#7dd3fc;">🌤️ แจ่มใส</span>
       </div>
       <div id="ui-zone" style="font-weight:bold; color:#64ffda; font-size:12px; margin: 2px 0;">โซน 1: บ่อน้ำจืด (Lv.1+)</div>
-      <div id="boss-timer" style="font-size: 11px; color: #8892b0;">บอสเกิดใน: 60:00</div>
+      <div id="boss-timer" style="font-size: 11px; color: #94a3b8;">บอสเกิดใน: 60:00</div>
       <div id="boss-alert">⚠️ บอสปลาหมึกยักษ์ปรากฏตัวในโซน 5! ⚠️</div>
     </div>
 
@@ -168,10 +279,10 @@
     <div id="leaderboard-list"></div>
   </div>
 
-  <!-- มินิเกมเย่อเบ็ดสู้แรงปลา (Tension & Stamina) -->
+  <!-- มินิเกมเย่อเบ็ดสู้แรงปลา -->
   <div id="minigame-box">
     <h3 id="minigame-title" style="color: #ffd700;">🎣 ปลากินเหยื่อแล้ว!</h3>
-    <p id="minigame-sub" style="font-size: 11px; color: #8892b0; margin-top: 4px;">
+    <p id="minigame-sub" style="font-size: 11px; color: #94a3b8; margin-top: 4px;">
       กดค้าง <b>[SPACEBAR]</b> หรือกดปุ่มด้านล่างค้างเพื่อเย่อเบ็ด!
     </p>
 
@@ -180,8 +291,8 @@
         <span>🐟 ความอึดปลา (Stamina)</span>
         <span id="stamina-text">100 / 100</span>
       </div>
-      <div style="width: 100%; height: 10px; background: #0a192f; border-radius: 5px; overflow: hidden; margin-top: 3px; border: 1px solid #233554;">
-        <div id="stamina-bar" style="width: 100%; height: 100%; background: #1e90ff;"></div>
+      <div style="width: 100%; height: 11px; background: #061121; border-radius: 6px; overflow: hidden; margin-top: 3px; border: 1px solid rgba(255,255,255,0.2);">
+        <div id="stamina-bar" style="width: 100%; height: 100%; background: linear-gradient(90deg, #0284c7, #38bdf8);"></div>
       </div>
     </div>
 
@@ -190,25 +301,30 @@
       <div id="cursor-bar"></div>
     </div>
 
-    <div style="text-align: left; font-size: 11px; margin-bottom: 10px;">
+    <div style="text-align: left; font-size: 11px; margin-bottom: 12px;">
       <div style="display: flex; justify-content: space-between; color: #ff6b6b;">
         <span id="snap-warning">⚠️ สถานะสายเบ็ด: ปกติ</span>
         <span id="snap-text">0.0s</span>
       </div>
-      <div style="width: 100%; height: 8px; background: #0a192f; border-radius: 4px; overflow: hidden; margin-top: 3px;">
-        <div id="snap-bar" style="width: 0%; height: 100%; background: #ff4757;"></div>
+      <div style="width: 100%; height: 8px; background: #061121; border-radius: 4px; overflow: hidden; margin-top: 3px;">
+        <div id="snap-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #f97316, #ef4444);"></div>
       </div>
     </div>
 
-    <button id="reel-hold-btn"
+    <button id="reel-hold-btn" class="btn-gold"
       onmousedown="isReeling = true" onmouseup="isReeling = false" onmouseleave="isReeling = false"
       ontouchstart="isReeling = true" ontouchend="isReeling = false"
-      style="width: 100%; padding: 12px; background: #ffd700; font-size: 15px;">
+      style="width: 100%; padding: 13px; font-size: 15px;">
       ✊ กดค้างเพื่อเย่อเบ็ด!
     </button>
   </div>
 
-  <!-- แชท -->
+  <!-- ปุ่มเดินวงกลม (3D Joystick) ฝั่งซ้าย -->
+  <div id="joystick-zone">
+    <div id="joystick-knob"></div>
+  </div>
+
+  <!-- แชท (ฝั่งขวา) -->
   <div id="chat-wrapper">
     <div id="chat-log"></div>
     <form id="chat-form" onsubmit="sendChatMessage(event)">
@@ -217,42 +333,32 @@
     </form>
   </div>
 
-  <!-- ปุ่มบังคับทิศทางสำหรับ iOS / มือถือ -->
-  <div id="mobile-dpad">
-    <div></div>
-    <button ontouchstart="keys['w']=true" ontouchend="keys['w']=false" onmousedown="keys['w']=true" onmouseup="keys['w']=false">▲</button>
-    <div></div>
-    <button ontouchstart="keys['a']=true" ontouchend="keys['a']=false" onmousedown="keys['a']=true" onmouseup="keys['a']=false">◀</button>
-    <button ontouchstart="keys['s']=true" ontouchend="keys['s']=false" onmousedown="keys['s']=true" onmouseup="keys['s']=false">▼</button>
-    <button ontouchstart="keys['d']=true" ontouchend="keys['d']=false" onmousedown="keys['d']=true" onmouseup="keys['d']=false">▶</button>
-  </div>
-
-  <!-- ปุ่มควบคุม -->
+  <!-- ปุ่มควบคุมด้านล่าง -->
   <div id="bottom-controls">
     <button id="fish-btn" onclick="toggleFishing()">🎣 หย่อนเบ็ดตกปลา</button>
     <button onclick="openModal('bag-modal')">🎒 กระเป๋า (<span id="bag-count">0</span>)</button>
     <button onclick="openModal('dex-modal')">📖 สมุดปลา (<span id="dex-count">0</span>/<span id="dex-total">0</span>)</button>
     <button onclick="openModal('shop-modal')">🏪 ร้านค้า & เหยื่อ</button>
-    <button onclick="socket.emit('cycleWeather')" style="background: #70a1ff;">🌦️ อากาศ</button>
-    <button onclick="socket.emit('forceSpawnBoss')" style="background: #ff4757; color: white;">🐙 บอส</button>
-    <button onclick="cheatMaxLevel()" style="background: #ffd700;">👑 Lv.100</button>
+    <button class="btn-blue" onclick="socket.emit('cycleWeather')">🌦️ อากาศ</button>
+    <button class="btn-red" onclick="socket.emit('forceSpawnBoss')">🐙 บอส</button>
+    <button class="btn-gold" onclick="cheatMaxLevel()">👑 Lv.100</button>
   </div>
 
   <!-- หน้าต่างกระเป๋า -->
   <div class="modal" id="bag-modal">
     <div class="modal-header">
       <h3>🎒 กระเป๋าปลา</h3>
-      <button class="close-btn" onclick="closeModals()">X</button>
+      <button class="btn-red" style="padding:4px 10px;" onclick="closeModals()">X</button>
     </div>
     <div id="bag-list"></div>
-    <button style="width: 100%; margin-top: 10px;" onclick="sellAllFish()">💰 ขายปลาทั้งหมด</button>
+    <button class="btn-gold" style="width: 100%; margin-top: 10px; padding: 11px;" onclick="sellAllFish()">💰 ขายปลาทั้งหมด</button>
   </div>
 
   <!-- หน้าต่างสมุดสะสมปลา -->
   <div class="modal" id="dex-modal">
     <div class="modal-header">
       <h3>📖 สมุดสะสมปลา (<span id="dex-modal-progress">0/0</span>)</h3>
-      <button class="close-btn" onclick="closeModals()">X</button>
+      <button class="btn-red" style="padding:4px 10px;" onclick="closeModals()">X</button>
     </div>
     <p style="font-size:11px; color:#ffd700; margin-bottom:8px;">
       🌟 สะสมครบทุกสายพันธุ์: ปลดล็อก "เบ็ดเทพเลวีอาธาน" และสิทธิ์จับ "ปลาเลวีอาธาน" ในโซน 6!
@@ -264,7 +370,7 @@
   <div class="modal" id="shop-modal">
     <div class="modal-header">
       <h3>🏪 ร้านค้าท่าเรือ & อุปกรณ์</h3>
-      <button class="close-btn" onclick="closeModals()">X</button>
+      <button class="btn-red" style="padding:4px 10px;" onclick="closeModals()">X</button>
     </div>
     <h4 style="color: #64ffda; margin: 8px 0 4px;">🧭 ไอเทมพิเศษ</h4>
     <div id="shop-relics"></div>
@@ -312,48 +418,41 @@ const BAITS = [
 
 // ================= 2. ฐานข้อมูลปลา 6 ระดับ =================
 const FISH_DB = [
-  // 🟢 Common (Lv. 1-20)
   { id: "c1", name: "ปลาซิว", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 1, subZone: "บ่อน้ำจืด", baseSize: "เล็ก", price: 5, exp: 15, weight: 50, speed: 1.4, favBaits: [0] },
   { id: "c2", name: "ปลาตะเพียน", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 2, subZone: "แม่น้ำ", baseSize: "เล็ก–กลาง", price: 8, exp: 20, weight: 45, speed: 1.5, favBaits: [0] },
   { id: "c3", name: "ปลาดุก", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 1, subZone: "บ่อโคลน", baseSize: "กลาง", price: 12, exp: 25, weight: 40, speed: 1.6, favBaits: [0, 4] },
   { id: "c4", name: "ปลาหมอ", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 1, subZone: "ลำคลอง", baseSize: "กลาง", price: 15, exp: 30, weight: 35, speed: 1.7, favBaits: [0] },
   { id: "c5", name: "ปลาไหล", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 2, subZone: "หน้าดิน", baseSize: "ยาว", price: 18, exp: 35, weight: 30, speed: 1.8, favBaits: [0] },
 
-  // 🔵 Uncommon (Lv. 21-40)
   { id: "u1", name: "ปลาเสือ", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 2, subZone: "แม่น้ำลึก", baseSize: "กลาง–ใหญ่", price: 40, exp: 65, weight: 35, speed: 2.2, favBaits: [1, 4] },
   { id: "u2", name: "ปลาเก๋า", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 3, subZone: "ชายฝั่ง", baseSize: "กลาง", price: 55, exp: 80, weight: 40, speed: 2.3, favBaits: [1] },
   { id: "u3", name: "ปลากะพง", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 3, subZone: "ปากแม่น้ำ", baseSize: "ใหญ่", price: 70, exp: 95, weight: 35, speed: 2.4, favBaits: [1] },
   { id: "u4", name: "ปลาช่อน", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 2, subZone: "บ่อหญ้า", baseSize: "ยาว", price: 85, exp: 110, weight: 30, speed: 2.5, favBaits: [1, 4] },
   { id: "u5", name: "ปลาปิรันย่า", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 2, subZone: "แม่น้ำป่า", baseSize: "กลาง", price: 100, exp: 130, weight: 25, speed: 2.7, favBaits: [4] },
 
-  // 🟣 Rare (Lv. 41-60)
   { id: "r1", name: "ปลาแซลมอน", rarity: "rare", rLabel: "🟣 หายาก", zone: 2, subZone: "แม่น้ำเย็น", baseSize: "ใหญ่", price: 250, exp: 220, weight: 22, speed: 3.1, favBaits: [1] },
   { id: "r2", name: "ปลาทูน่า", rarity: "rare", rLabel: "🟣 หายาก", zone: 4, subZone: "ทะเลเปิด", baseSize: "ใหญ่มาก", price: 400, exp: 320, weight: 35, speed: 3.3, favBaits: [2, 5] },
   { id: "r3", name: "ปลากระโทงแทง", rarity: "rare", rLabel: "🟣 หายาก", zone: 5, subZone: "ทะเลลึก", baseSize: "ยาวมาก", price: 550, exp: 420, weight: 30, speed: 3.5, favBaits: [5] },
   { id: "r4", name: "ปลาฉลามเสือ", rarity: "rare", rLabel: "🟣 หายาก", zone: 3, subZone: "ชายฝั่งลึก", baseSize: "ใหญ่", price: 700, exp: 520, weight: 20, speed: 3.7, favBaits: [1] },
   { id: "r5", name: "ปลาไพก์", rarity: "rare", rLabel: "🟣 หายาก", zone: 4, subZone: "ทะเลสาบเหนือ", baseSize: "ยาว", price: 800, exp: 600, weight: 25, speed: 3.8, favBaits: [2] },
 
-  // 🟠 Legendary (Lv. 61-80)
   { id: "l1", name: "ปลากระเบนยักษ์", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 2, subZone: "แม่น้ำลึก", baseSize: "ใหญ่", price: 1500, exp: 950, weight: 12, speed: 4.1, favBaits: [1, 4] },
   { id: "l2", name: "ปลาฉลามขาว", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 4, subZone: "ทะเลเปิด", baseSize: "ใหญ่มาก", price: 2500, exp: 1400, weight: 18, speed: 4.3, favBaits: [2, 5] },
   { id: "l3", name: "ปลาอาราไพมา", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 2, subZone: "แม่น้ำป่า", baseSize: "ยาวมาก", price: 3000, exp: 1700, weight: 10, speed: 4.4, favBaits: [4] },
   { id: "l4", name: "ปลาหมึกยักษ์", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 5, subZone: "ทะเลลึก", baseSize: "ใหญ่", price: 4000, exp: 2100, weight: 20, speed: 4.6, favBaits: [3, 5] },
   { id: "l5", name: "ปลาไวท์ฟิช", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 5, subZone: "ทะเลสาบน้ำแข็ง", baseSize: "กลาง", price: 5000, exp: 2500, weight: 22, speed: 4.7, favBaits: [6], cond: "ice_bait", condText: "ต้องใช้ 🧊 เหยื่อน้ำแข็ง" },
 
-  // 🔴 Mythic (Lv. 81-99)
   { id: "m1", name: "ปลามังกร", rarity: "mythic", rLabel: "🔴 Mythic", zone: 6, subZone: "ถ้ำใต้น้ำ", baseSize: "ยาวมาก", price: 10000, exp: 4000, weight: 25, speed: 5.0, favBaits: [3], cond: "night", condText: "กลางคืนเท่านั้น" },
   { id: "m2", name: "ปลาเรืองแสง", rarity: "mythic", rLabel: "🔴 Mythic", zone: 5, subZone: "ทะเลลึก", baseSize: "กลาง", price: 12000, exp: 4500, weight: 25, speed: 5.1, favBaits: [3], cond: "rain", condText: "ฝนตกเท่านั้น" },
   { id: "m3", name: "ปลาโบราณ", rarity: "mythic", rLabel: "🔴 Mythic", zone: 6, subZone: "ซากเรือจม", baseSize: "ใหญ่", price: 15000, exp: 5200, weight: 25, speed: 5.2, favBaits: [3], cond: "relic", condText: "ต้องมีเข็มทิศซากเรือ" },
   { id: "m4", name: "ปลาวิญญาณ", rarity: "mythic", rLabel: "🔴 Mythic", zone: 6, subZone: "ม่านหมอก", baseSize: "ลึกลับ", price: 20000, exp: 6500, weight: 8, speed: 5.4, favBaits: [3], cond: "fog", condText: "หมอกลงเท่านั้น (หายาก 1%)" },
 
-  // 🌟 God-tier (Lv. 100)
   { id: "g1", name: "ราชาแห่งท้องทะเล", rarity: "god", rLabel: "🌟 God-tier", zone: 6, subZone: "บัลลังก์สมุทร", baseSize: "มหึมา", price: 50000, exp: 0, weight: 10, speed: 5.8, favBaits: [3], cond: "god_seaking", condText: "Lv.100 (มีตัวเดียวในเซิร์ฟเวอร์)" },
   { id: "g2", name: "ปลาเลวีอาธาน", rarity: "god", rLabel: "🌟 God-tier", zone: 6, subZone: "ห้วงอเวจี", baseSize: "เทวะ", price: 80000, exp: 0, weight: 15, speed: 6.0, favBaits: [3], cond: "god_leviathan", condText: "Lv.100 + สะสมปลาครบทุกสายพันธุ์" }
 ];
 
 const BOSS_FISH = { id: "boss_kraken", name: "👑 บอสปลาหมึกยักษ์คราเคน", rarity: "god", rLabel: "👑 WORLD BOSS", price: 15000, exp: 5000, speed: 5.5, isBoss: true };
 
-// ตารางสุ่มขนาดปลา 5 ระดับ
 const SIZE_MODIFIERS = [
   { label: "เล็ก (Small)",     weightMult: 0.5, priceMult: 0.6, chance: 0.40, color: "#a4b0be" },
   { label: "กลาง (Medium)",   weightMult: 1.0, priceMult: 1.0, chance: 0.35, color: "#ffffff" },
@@ -362,16 +461,22 @@ const SIZE_MODIFIERS = [
   { label: "ตำนาน (Trophy)",  weightMult: 4.0, priceMult: 8.0, chance: 0.01, color: "#ffd700" }
 ];
 
-// ================= สถานะเกม =================
+// ================= สถานะเกม & โลก 3D =================
 let myPlayer = null;
 let otherPlayers = {};
+let playerAngles = {};
 let chatBubbles = {};
 let particles = [];
+let wakeTrails = [];
+let ambientFish = [];
 let world = { timeMinutes: 480, isNight: false, weather: 'clear', bossActive: false, bossSecondsLeft: 3600, bossX: 850, bossY: 350, seaKingCaughtBy: null };
 const keys = {};
 let fishingTimer = null;
 
-// สถานะระบบเย่อเบ็ด (Tension & Stamina)
+// สถานะปุ่มเดินวงกลม (3D Joystick)
+let joystick = { active: false, dx: 0, dy: 0, touchId: null };
+
+// สถานะมินิเกมเย่อเบ็ด
 let isReeling = false;
 let lastFrameTime = performance.now();
 let minigame = {
@@ -379,6 +484,81 @@ let minigame = {
   tensionZone: 40, pullStrength: 1.0, stamina: 100, maxStamina: 100,
   struggleInterval: 1.5, struggleTimer: 0, snapTime: 2.0, dangerTimer: 0
 };
+
+// ================= ระบบควบคุมปุ่มเดินวงกลม (Virtual Joystick) =================
+const joyZone = document.getElementById("joystick-zone");
+const joyKnob = document.getElementById("joystick-knob");
+
+function handleJoystickMove(clientX, clientY) {
+  const rect = joyZone.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  const maxRadius = rect.width * 0.36;
+
+  let rawX = clientX - centerX;
+  let rawY = clientY - centerY;
+  const dist = Math.hypot(rawX, rawY);
+
+  if (dist > maxRadius) {
+    rawX = (rawX / dist) * maxRadius;
+    rawY = (rawY / dist) * maxRadius;
+  }
+
+  joyKnob.style.transition = "none";
+  joyKnob.style.transform = `translate(${rawX}px, ${rawY}px)`;
+
+  joystick.dx = rawX / maxRadius;
+  joystick.dy = rawY / maxRadius;
+}
+
+function resetJoystick() {
+  joystick.active = false;
+  joystick.dx = 0;
+  joystick.dy = 0;
+  joystick.touchId = null;
+  joyKnob.style.transition = "transform 0.14s cubic-bezier(0.2, 0.8, 0.2, 1)";
+  joyKnob.style.transform = "translate(0px, 0px)";
+}
+
+joyZone.addEventListener("touchstart", (e) => {
+  e.preventDefault();
+  const touch = e.changedTouches[0];
+  joystick.active = true;
+  joystick.touchId = touch.identifier;
+  handleJoystickMove(touch.clientX, touch.clientY);
+}, { passive: false });
+
+window.addEventListener("touchmove", (e) => {
+  if (!joystick.active) return;
+  for (let i = 0; i < e.changedTouches.length; i++) {
+    if (e.changedTouches[i].identifier === joystick.touchId) {
+      handleJoystickMove(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
+      break;
+    }
+  }
+}, { passive: false });
+
+window.addEventListener("touchend", (e) => {
+  if (!joystick.active) return;
+  for (let i = 0; i < e.changedTouches.length; i++) {
+    if (e.changedTouches[i].identifier === joystick.touchId) {
+      resetJoystick();
+      break;
+    }
+  }
+});
+
+// รองรับการลากเมาส์บนคอมพิวเตอร์ด้วย
+joyZone.addEventListener("mousedown", (e) => {
+  joystick.active = true;
+  handleJoystickMove(e.clientX, e.clientY);
+});
+window.addEventListener("mousemove", (e) => {
+  if (joystick.active && joystick.touchId === null) handleJoystickMove(e.clientX, e.clientY);
+});
+window.addEventListener("mouseup", () => {
+  if (joystick.active && joystick.touchId === null) resetJoystick();
+});
 
 // ================= Socket.io =================
 function joinServer() { socket.emit("joinGame", document.getElementById("username-input").value); }
@@ -388,6 +568,7 @@ socket.on("joinError", (msg) => { document.getElementById("login-error").innerTe
 socket.on("joinSuccess", (data) => {
   myPlayer = {
     ...data.player,
+    angle: 0,
     exp: 0, money: 50, rod: 0, bait: 0,
     hasRelic: false,
     ownedBoats: [0], ownedRods: [0],
@@ -399,6 +580,7 @@ socket.on("joinSuccess", (data) => {
   otherPlayers = data.allPlayers;
   delete otherPlayers[myPlayer.id];
 
+  initAmbientFish();
   document.getElementById("login-screen").style.display = "none";
   updateOnlineCount();
   updateUI();
@@ -406,9 +588,19 @@ socket.on("joinSuccess", (data) => {
   requestAnimationFrame(gameLoop);
 });
 
-socket.on("playerJoined", (p) => { otherPlayers[p.id] = p; updateOnlineCount(); });
-socket.on("playerMoved", (p) => { if (otherPlayers[p.id]) otherPlayers[p.id] = p; });
-socket.on("playerLeft", (id) => { delete otherPlayers[id]; delete chatBubbles[id]; updateOnlineCount(); });
+socket.on("playerJoined", (p) => { otherPlayers[p.id] = p; playerAngles[p.id] = 0; updateOnlineCount(); });
+socket.on("playerMoved", (p) => {
+  if (otherPlayers[p.id]) {
+    const dx = p.x - otherPlayers[p.id].x;
+    const dy = p.y - otherPlayers[p.id].y;
+    if (Math.hypot(dx, dy) > 0.5) {
+      playerAngles[p.id] = Math.atan2(dy, dx);
+      spawnWake(otherPlayers[p.id].x, otherPlayers[p.id].y, playerAngles[p.id]);
+    }
+    otherPlayers[p.id] = p;
+  }
+});
+socket.on("playerLeft", (id) => { delete otherPlayers[id]; delete playerAngles[id]; delete chatBubbles[id]; updateOnlineCount(); });
 
 socket.on("leaderboardUpdate", (list) => {
   const lb = document.getElementById("leaderboard-list");
@@ -474,7 +666,7 @@ function addLog(msg, color = "#fff") {
   log.scrollTop = log.scrollHeight;
 }
 
-// ================= แผนที่ 6 โซน =================
+// ================= แผนที่ 6 โซน & การเคลื่อนที่ 360 องศา =================
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
 function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
@@ -518,29 +710,46 @@ function updateMovement() {
   if (document.activeElement === document.getElementById("chat-input")) return;
 
   const speed = BOATS[myPlayer.boat].speed;
-  let nextX = myPlayer.x;
-  let nextY = myPlayer.y;
-  let moved = false;
+  let vx = 0;
+  let vy = 0;
 
-  if (keys["w"] || keys["arrowup"]) { nextY -= speed; moved = true; }
-  if (keys["s"] || keys["arrowdown"]) { nextY += speed; moved = true; }
-  if (keys["a"] || keys["arrowleft"]) { nextX -= speed; moved = true; }
-  if (keys["d"] || keys["arrowright"]) { nextX += speed; moved = true; }
-
-  nextX = Math.max(25, Math.min(canvas.width - 25, nextX));
-  nextY = Math.max(80, Math.min(canvas.height - 80, nextY));
-
-  const targetZone = getCurrentZone(nextX);
-  if (myPlayer.lvl < ZONE_INFO[targetZone].reqLvl) return;
-  if (targetZone > BOATS[myPlayer.boat].maxZone) return;
-
-  if (moved) {
-    myPlayer.x = nextX;
-    myPlayer.y = nextY;
-    syncMyState();
+  // รองรับทั้งปุ่มเดินวงกลม (360 องศา) และคีย์บอร์ด WASD
+  if (joystick.active && (Math.abs(joystick.dx) > 0.08 || Math.abs(joystick.dy) > 0.08)) {
+    vx = joystick.dx * speed;
+    vy = joystick.dy * speed;
+  } else {
+    if (keys["w"] || keys["arrowup"]) vy -= 1;
+    if (keys["s"] || keys["arrowdown"]) vy += 1;
+    if (keys["a"] || keys["arrowleft"]) vx -= 1;
+    if (keys["d"] || keys["arrowright"]) vx += 1;
+    if (vx !== 0 || vy !== 0) {
+      const len = Math.hypot(vx, vy);
+      vx = (vx / len) * speed;
+      vy = (vy / len) * speed;
+    }
   }
 
-  document.getElementById("ui-zone").innerText = ZONE_INFO[targetZone].name;
+  if (vx !== 0 || vy !== 0) {
+    // หมุนหัวเรืออย่างนุ่มนวลตามทิศทาง
+    const targetAngle = Math.atan2(vy, vx);
+    let diff = targetAngle - myPlayer.angle;
+    while (diff > Math.PI) diff -= Math.PI * 2;
+    while (diff < -Math.PI) diff += Math.PI * 2;
+    myPlayer.angle += diff * 0.22;
+
+    let nextX = Math.max(30, Math.min(canvas.width - 30, myPlayer.x + vx));
+    let nextY = Math.max(85, Math.min(canvas.height - 85, myPlayer.y + vy));
+
+    const targetZone = getCurrentZone(nextX);
+    if (myPlayer.lvl >= ZONE_INFO[targetZone].reqLvl && targetZone <= BOATS[myPlayer.boat].maxZone) {
+      myPlayer.x = nextX;
+      myPlayer.y = nextY;
+      spawnWake(myPlayer.x, myPlayer.y, myPlayer.angle);
+      syncMyState();
+    }
+  }
+
+  document.getElementById("ui-zone").innerText = ZONE_INFO[getCurrentZone(myPlayer.x)].name;
 }
 
 function syncMyState() {
@@ -552,7 +761,7 @@ function syncMyState() {
   });
 }
 
-// ================= ระบบตกปลา & เย่อเบ็ดสู้แรงปลา =================
+// ================= ระบบตกปลา & เย่อเบ็ด =================
 function toggleFishing() {
   if (minigame.active) return;
   const btn = document.getElementById("fish-btn");
@@ -561,7 +770,7 @@ function toggleFishing() {
     clearTimeout(fishingTimer);
     myPlayer.isFishing = false;
     btn.innerText = "🎣 หย่อนเบ็ดตกปลา";
-    btn.style.background = "#64ffda";
+    btn.className = "";
     syncMyState();
     return;
   }
@@ -585,7 +794,7 @@ function toggleFishing() {
 
   myPlayer.isFishing = true;
   btn.innerText = "⏳ กำลังรอปลากินเหยื่อ...";
-  btn.style.background = "#ff9f43";
+  btn.className = "btn-gold";
   syncMyState();
 
   let waitTime = Math.max(1000, 3200 - (RODS[myPlayer.rod].power * 150));
@@ -748,7 +957,7 @@ function updateMinigame(dt) {
     document.getElementById("snap-warning").style.color = "#ff4757";
   }
 
-  document.getElementById("cursor-bar").style.left = `calc(${minigame.cursorPos}% - 4px)`;
+  document.getElementById("cursor-bar").style.left = `calc(${minigame.cursorPos}% - 5px)`;
   document.getElementById("stamina-bar").style.width = `${(minigame.stamina / minigame.maxStamina) * 100}%`;
   document.getElementById("stamina-text").innerText = `${Math.ceil(minigame.stamina)} / ${minigame.maxStamina}`;
 
@@ -810,7 +1019,7 @@ function finishFishingMinigame(success) {
   myPlayer.isFishing = false;
   const btn = document.getElementById("fish-btn");
   btn.innerText = "🎣 หย่อนเบ็ดตกปลา";
-  btn.style.background = "#64ffda";
+  btn.className = "";
   syncMyState();
   updateUI();
 }
@@ -838,7 +1047,7 @@ function unlockMaxLevelRewards() {
   if (!myPlayer.ownedRods.includes(5)) myPlayer.ownedRods.push(5);
   myPlayer.boat = 5;
   myPlayer.rod = 5;
-  addLog("👑 ยินดีด้วย! คุณบรรลุเลเวล 100 (MAX) ปลดล็อกสกินเรือจักรพรรดิ ตรีศูลโพไซดอน และสิทธิ์ล่าปลา God-tier แล้ว!", "#ffd700");
+  addLog("👑 ยินดีด้วย! คุณบรรลุเลเวล 100 (MAX) ปลดล็อกเรือจักรพรรดิ ตรีศูลโพไซดอน และสิทธิ์ล่าปลา God-tier แล้ว!", "#ffd700");
   renderShop();
   updateUI();
   syncMyState();
@@ -870,7 +1079,7 @@ function closeModals() { document.querySelectorAll(".modal").forEach(m => m.styl
 
 function renderBag() {
   const list = document.getElementById("bag-list");
-  list.innerHTML = myPlayer.bag.length === 0 ? "<p style='color:#8892b0'>ไม่มีปลาในกระเป๋า</p>" : "";
+  list.innerHTML = myPlayer.bag.length === 0 ? "<p style='color:#94a3b8'>ไม่มีปลาในกระเป๋า</p>" : "";
   myPlayer.bag.forEach(fish => {
     const trophyBorder = fish.isTrophy ? "border: 1px solid #ffd700;" : "";
     list.innerHTML += `
@@ -879,7 +1088,7 @@ function renderBag() {
           <span class="r-${fish.rarity}">[${fish.rLabel}]</span> 
           <b>${fish.name}</b> 
           <span style="color:${fish.sizeColor || '#fff'}">[${fish.rolledSize}]</span>
-          <span style="color:#8892b0; font-size:11px;">(${fish.finalWeight} kg)</span>
+          <span style="color:#94a3b8; font-size:11px;">(${fish.finalWeight} kg)</span>
         </span>
         <span class="gold">${(fish.finalPrice || fish.price).toLocaleString()} G</span>
       </div>`;
@@ -906,7 +1115,7 @@ function renderDex() {
     grid.innerHTML += `
       <div class="dex-card ${unlocked ? '' : 'dex-locked'}">
         <div class="r-${f.rarity}"><b>${unlocked ? f.name : '??? (ยังไม่ค้นพบ)'}</b></div>
-        <div style="color:#8892b0;">${f.rLabel} | โซน ${f.zone} (${f.subZone})</div>
+        <div style="color:#94a3b8;">${f.rLabel} | โซน ${f.zone} (${f.subZone})</div>
         <div style="color:#ffd700;">ราคาพื้นฐาน: ${f.price.toLocaleString()} G</div>
         ${f.condText ? `<div style="color:#ff6b6b;">เงื่อนไข: ${f.condText}</div>` : ''}
       </div>`;
@@ -918,11 +1127,11 @@ function renderShop() {
   relicEl.innerHTML = `
     <div class="item-row exclusive-item">
       <div>
-        <strong>🧭 เข็มทิศซากเรือโบราณ</strong> <span style="font-size:11px; color:#8892b0;">(ปลดล็อก "ปลาโบราณ" ในโซน 6)</span>
+        <strong>🧭 เข็มทิศซากเรือโบราณ</strong> <span style="font-size:11px; color:#94a3b8;">(ปลดล็อก "ปลาโบราณ" ในโซน 6)</span>
       </div>
       ${myPlayer.hasRelic 
         ? `<button disabled>ครอบครองแล้ว</button>` 
-        : `<button onclick="buyRelic()" ${myPlayer.money < 5000 ? 'disabled' : ''}>ซื้อ (5,000 G)</button>`}
+        : `<button class="btn-gold" onclick="buyRelic()" ${myPlayer.money < 5000 ? 'disabled' : ''}>ซื้อ (5,000 G)</button>`}
     </div>`;
 
   const baitContainer = document.getElementById("shop-baits");
@@ -936,17 +1145,17 @@ function renderShop() {
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div>
             <strong>${b.name}</strong> <span style="color:#ffd700;">(${b.price} G/ชิ้น)</span>
-            <span style="background:#233554; padding:2px 6px; border-radius:4px; font-size:11px; margin-left:4px;">มีอยู่: <b>${qty}</b> ชิ้น</span>
+            <span style="background:rgba(255,255,255,0.1); padding:2px 7px; border-radius:6px; font-size:11px; margin-left:4px;">มีอยู่: <b>${qty}</b> ชิ้น</span>
           </div>
-          <div style="display:flex; gap:4px;">
+          <div style="display:flex; gap:5px;">
             <button onclick="buyBait(${b.id}, 1)" ${myPlayer.money < b.price ? 'disabled' : ''}>+1</button>
             <button onclick="buyBait(${b.id}, 10)" ${myPlayer.money < b.price * 10 ? 'disabled' : ''}>+10 (${b.price * 10}G)</button>
             ${isEquipped 
-              ? `<button disabled style="background:#2ed573; color:#0a192f;">กำลังใช้</button>` 
-              : `<button onclick="equipBait(${b.id})" ${qty <= 0 ? 'disabled' : ''}>เลือกใช้</button>`}
+              ? `<button disabled class="btn-gold">กำลังใช้</button>` 
+              : `<button class="btn-blue" onclick="equipBait(${b.id})" ${qty <= 0 ? 'disabled' : ''}>เลือกใช้</button>`}
           </div>
         </div>
-        <div style="font-size:11px; color:#8892b0; display:flex; justify-content:space-between; flex-wrap:wrap;">
+        <div style="font-size:11px; color:#94a3b8; display:flex; justify-content:space-between; flex-wrap:wrap;">
           <span>🐟 ชอบ: ${b.targetDesc} | 📍 โซน: ${b.zoneDesc}</span>
           <span style="color:#64ffda;">✨ ${b.bonusDesc}</span>
         </div>
@@ -995,13 +1204,13 @@ function renderShopCategory(elId, items, ownedKey, equipKey) {
 
     let btn = "";
     if (isEquipped) btn = `<button disabled>กำลังใช้งาน</button>`;
-    else if (isOwned) btn = `<button onclick="equipItem('${equipKey}', ${item.id})">สวมใส่</button>`;
+    else if (isOwned) btn = `<button class="btn-blue" onclick="equipItem('${equipKey}', ${item.id})">สวมใส่</button>`;
     else if (item.requiresFullDex && !isDexComplete()) btn = `<button disabled>🔒 สมุดปลา 100%</button>`;
     else if (isLocked) btn = `<button disabled>🔒 Lv.${item.reqLvl}</button>`;
-    else btn = `<button onclick="buyItem('${ownedKey}', '${equipKey}', ${item.id}, ${item.price})" ${myPlayer.money < item.price ? 'disabled' : ''}>ซื้อ (${item.price.toLocaleString()} G)</button>`;
+    else btn = `<button class="btn-gold" onclick="buyItem('${ownedKey}', '${equipKey}', ${item.id}, ${item.price})" ${myPlayer.money < item.price ? 'disabled' : ''}>ซื้อ (${item.price.toLocaleString()} G)</button>`;
 
     const rowClass = item.exclusive ? "item-row exclusive-item" : "item-row";
-    container.innerHTML += `<div class="${rowClass}"><div><strong>${item.name}</strong> <span style="font-size:11px; color:#8892b0;">(Lv.${item.reqLvl})</span></div>${btn}</div>`;
+    container.innerHTML += `<div class="${rowClass}"><div><strong>${item.name}</strong> <span style="font-size:11px; color:#94a3b8;">(Lv.${item.reqLvl})</span></div>${btn}</div>`;
   });
 }
 
@@ -1046,174 +1255,401 @@ function updateUI() {
     : `<span style="color:#ff6b6b;">❌ ยังไม่มีเข็มทิศซากเรือ</span>`;
 }
 
-// ================= วาดกราฟิก 6 โซน + เอฟเฟกต์ฝน/หมอก/ออร่า =================
+// ================= ระบบเอนจินกราฟิก 3D Isometric / Pseudo-3D =================
+function initAmbientFish() {
+  ambientFish = [];
+  for (let i = 0; i < 24; i++) {
+    ambientFish.push({
+      x: Math.random() * canvas.width,
+      y: 100 + Math.random() * (canvas.height - 180),
+      vx: (Math.random() < 0.5 ? -1 : 1) * (0.4 + Math.random() * 0.8),
+      size: 6 + Math.random() * 10,
+      phase: Math.random() * Math.PI * 2
+    });
+  }
+}
+
+function spawnWake(x, y, angle) {
+  if (Math.random() < 0.65) {
+    wakeTrails.push({
+      x: x - Math.cos(angle) * 24,
+      y: y - Math.sin(angle) * 24,
+      radius: 4,
+      alpha: 0.55
+    });
+  }
+}
+
+function spawnAuraParticles(x, y) {
+  if (Math.random() < 0.5) {
+    particles.push({
+      x: x + (Math.random() - 0.5) * 60,
+      y: y + (Math.random() - 0.5) * 40,
+      vy: -0.7 - Math.random() * 0.9,
+      size: 2 + Math.random() * 3,
+      alpha: 1
+    });
+  }
+}
+
 function gameLoop(now = performance.now()) {
   const dt = Math.min(0.1, (now - lastFrameTime) / 1000);
   lastFrameTime = now;
 
   updateMovement();
   updateMinigame(dt);
-  drawWorld();
+  drawWorld3D(now / 1000);
   requestAnimationFrame(gameLoop);
 }
 
-function spawnAuraParticles(x, y) {
-  if (Math.random() < 0.45) {
-    particles.push({
-      x: x + (Math.random() - 0.5) * 55,
-      y: y + (Math.random() - 0.5) * 35,
-      vy: -0.6 - Math.random() * 0.8,
-      size: 2 + Math.random() * 2.5,
-      alpha: 1
-    });
-  }
-}
-
-function updateAndDrawParticles() {
-  for (let i = particles.length - 1; i >= 0; i--) {
-    const p = particles[i];
-    p.y += p.vy;
-    p.alpha -= 0.025;
-    if (p.alpha <= 0) { particles.splice(i, 1); continue; }
-    ctx.save();
-    ctx.fillStyle = `rgba(255, 215, 0, ${p.alpha})`;
-    ctx.shadowColor = "#ffd700";
-    ctx.shadowBlur = 8;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-}
-
-function drawWorld() {
+function drawWorld3D(timeSec) {
   const w = canvas.width;
   const h = canvas.height;
 
-  const zoneColorsDay = ["#55efc4", "#00cec9", "#48dbfb", "#0abde3", "#1e3799", "#3c1874"];
-  const zoneColorsNight = ["#1b4332", "#081c15", "#132a46", "#0c1c30", "#050d17", "#1a0b2e"];
-  const palette = world.isNight ? zoneColorsNight : zoneColorsDay;
+  // เฉดสีน้ำทะเล 3D แบบไล่ระดับลึก (Surface -> Deep Abyss)
+  const zoneGradientsDay = [
+    ["#38ef7d", "#11998e"], // โซน 1 บ่อน้ำจืดมรกต
+    ["#00f2fe", "#0284c7"], // โซน 2 แม่น้ำใส
+    ["#38bdf8", "#0369a1"], // โซน 3 ชายฝั่ง
+    ["#0284c7", "#1e3a8a"], // โซน 4 ทะเลเปิด
+    ["#1e3a8a", "#0f172a"], // โซน 5 ทะเลลึก
+    ["#3b0764", "#090414"]  // โซน 6 ถ้ำอเวจี
+  ];
+  const zoneGradientsNight = [
+    ["#064e3b", "#022c22"],
+    ["#0c4a6e", "#082f49"],
+    ["#075985", "#0c4a6e"],
+    ["#1e3a8a", "#090d16"],
+    ["#0f172a", "#020617"],
+    ["#1e1b4b", "#05020a"]
+  ];
+  const palette = world.isNight ? zoneGradientsNight : zoneGradientsDay;
 
   for (let z = 1; z <= 6; z++) {
     const x1 = w * ZONE_INFO[z].startPct;
     const x2 = w * ZONE_INFO[z].endPct;
-    ctx.fillStyle = palette[z - 1];
-    ctx.fillRect(x1, 0, x2 - x1, h);
+    const grad = ctx.createLinearGradient(x1, 0, x2, h);
+    grad.addColorStop(0, palette[z - 1][0]);
+    grad.addColorStop(1, palette[z - 1][1]);
+    ctx.fillStyle = grad;
+    ctx.fillRect(x1, 0, x2 - x1 + 1, h);
 
+    // เส้นแบ่งโซนเรืองแสง 3D
     if (z > 1) {
-      ctx.strokeStyle = z === 6 ? "rgba(255, 215, 0, 0.6)" : "rgba(255, 255, 255, 0.2)";
-      ctx.setLineDash([8, 8]);
+      ctx.strokeStyle = z === 6 ? "rgba(255, 215, 0, 0.55)" : "rgba(255, 255, 255, 0.16)";
+      ctx.lineWidth = z === 6 ? 2 : 1;
+      ctx.setLineDash([10, 10]);
       ctx.beginPath();
       ctx.moveTo(x1, 0); ctx.lineTo(x1, h);
       ctx.stroke();
       ctx.setLineDash([]);
     }
 
-    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.fillStyle = "rgba(255,255,255,0.6)";
     ctx.font = "bold 11px sans-serif";
-    ctx.fillText(`โซน ${z} (Lv.${ZONE_INFO[z].reqLvl}+)`, x1 + 6, 95);
+    ctx.fillText(`โซน ${z} (Lv.${ZONE_INFO[z].reqLvl}+)`, x1 + 8, 98);
   }
 
-  if (world.bossActive) {
-    ctx.font = "54px sans-serif";
-    ctx.fillText("🐙", world.bossX - 27, world.bossY + 18);
-    ctx.fillStyle = "#ff4757";
-    ctx.font = "bold 12px sans-serif";
-    ctx.fillText("BOSS: ปลาหมึกยักษ์", world.bossX - 50, world.bossY - 32);
+  // วาดคลื่นผิวน้ำ 3D (Water Caustics & Ripples)
+  ctx.save();
+  ctx.strokeStyle = world.isNight ? "rgba(125, 211, 252, 0.06)" : "rgba(255, 255, 255, 0.14)";
+  ctx.lineWidth = 1.5;
+  for (let row = 0; row < 10; row++) {
+    const baseY = 90 + row * ((h - 140) / 10);
+    ctx.beginPath();
+    for (let x = 0; x <= w; x += 40) {
+      const waveY = baseY + Math.sin(x * 0.015 + timeSec * 1.8 + row) * 6;
+      if (x === 0) ctx.moveTo(x, waveY);
+      else ctx.lineTo(x, waveY);
+    }
+    ctx.stroke();
   }
+  ctx.restore();
 
-  Object.values(otherPlayers).forEach(p => {
-    drawBoat(p.id, p.x, p.y, p.name, p.lvl, p.title, p.color, p.boat, p.rod, p.isFishing);
+  // วาดเงาปลาว่ายใต้ผิวน้ำ (3D Underwater Shadows)
+  ambientFish.forEach(f => {
+    f.x += f.vx;
+    if (f.x < -30) f.x = w + 30;
+    if (f.x > w + 30) f.x = -30;
+    const swimY = f.y + Math.sin(timeSec * 2 + f.phase) * 8;
+
+    ctx.save();
+    ctx.translate(f.x, swimY);
+    if (f.vx < 0) ctx.scale(-1, 1);
+    ctx.fillStyle = "rgba(0, 10, 25, 0.22)";
+    ctx.beginPath();
+    ctx.ellipse(0, 0, f.size * 1.6, f.size * 0.55, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // หางปลาสะบัด
+    const tailSwing = Math.sin(timeSec * 8 + f.phase) * 3;
+    ctx.beginPath();
+    ctx.moveTo(-f.size * 1.4, 0);
+    ctx.lineTo(-f.size * 2.2, -f.size * 0.5 + tailSwing);
+    ctx.lineTo(-f.size * 2.2, f.size * 0.5 + tailSwing);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
   });
 
-  if (myPlayer) {
-    drawBoat(myPlayer.id, myPlayer.x, myPlayer.y, myPlayer.name, myPlayer.lvl, myPlayer.title, "#64ffda", myPlayer.boat, myPlayer.rod, myPlayer.isFishing);
-  }
-
-  updateAndDrawParticles();
-
-  if (world.weather === 'rain') {
-    ctx.strokeStyle = "rgba(174, 214, 241, 0.45)";
+  // วาดฟองคลื่นท้ายเรือ (Boat Wake Trails)
+  for (let i = wakeTrails.length - 1; i >= 0; i--) {
+    const wk = wakeTrails[i];
+    wk.radius += 0.45;
+    wk.alpha -= 0.014;
+    if (wk.alpha <= 0) { wakeTrails.splice(i, 1); continue; }
+    ctx.save();
+    ctx.strokeStyle = `rgba(255, 255, 255, ${wk.alpha})`;
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    for (let i = 0; i < 80; i++) {
-      const rx = Math.random() * w;
-      const ry = Math.random() * h;
+    ctx.arc(wk.x, wk.y, wk.radius, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // วาดบอสปลาหมึกยักษ์ 3D พร้อมเงาใต้น้ำ
+  if (world.bossActive) {
+    const bobY = Math.sin(timeSec * 2.5) * 6;
+    ctx.save();
+    ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
+    ctx.beginPath();
+    ctx.ellipse(world.bossX, world.bossY + 26, 42, 16, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.shadowColor = "#ff4757";
+    ctx.shadowBlur = 20;
+    ctx.font = "58px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("🐙", world.bossX, world.bossY + 18 + bobY);
+
+    ctx.fillStyle = "#ff5e6c";
+    ctx.font = "bold 12px sans-serif";
+    ctx.fillText("👑 BOSS: ปลาหมึกยักษ์คราเคน", world.bossX, world.bossY - 36 + bobY);
+    ctx.restore();
+  }
+
+  // วาดเรือผู้เล่นอื่นแบบโมเดล 3D
+  Object.values(otherPlayers).forEach(p => {
+    drawBoat3D(p.id, p.x, p.y, playerAngles[p.id] || 0, p.name, p.lvl, p.title, p.color, p.boat, p.rod, p.isFishing, timeSec);
+  });
+
+  // วาดเรือของเราแบบโมเดล 3D
+  if (myPlayer) {
+    drawBoat3D(myPlayer.id, myPlayer.x, myPlayer.y, myPlayer.angle || 0, myPlayer.name, myPlayer.lvl, myPlayer.title, "#64ffda", myPlayer.boat, myPlayer.rod, myPlayer.isFishing, timeSec);
+  }
+
+  // วาดละอองออร่าสีทอง Lv.100
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.y += p.vy;
+    p.alpha -= 0.024;
+    if (p.alpha <= 0) { particles.splice(i, 1); continue; }
+    ctx.save();
+    ctx.fillStyle = `rgba(255, 215, 0, ${p.alpha})`;
+    ctx.shadowColor = "#ffd700";
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // เอฟเฟกต์ฝนตก 3D & หมอก
+  if (world.weather === 'rain') {
+    ctx.strokeStyle = "rgba(186, 230, 253, 0.5)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let i = 0; i < 95; i++) {
+      const rx = (Math.random() * w);
+      const ry = (Math.random() * h);
       ctx.moveTo(rx, ry);
-      ctx.lineTo(rx - 6, ry + 18);
+      ctx.lineTo(rx - 8, ry + 22);
     }
     ctx.stroke();
   } else if (world.weather === 'fog') {
-    ctx.fillStyle = "rgba(220, 230, 240, 0.22)";
+    const fogGrad = ctx.createRadialGradient(w/2, h/2, 80, w/2, h/2, w*0.75);
+    fogGrad.addColorStop(0, "rgba(226, 232, 240, 0.14)");
+    fogGrad.addColorStop(1, "rgba(203, 213, 225, 0.34)");
+    ctx.fillStyle = fogGrad;
     ctx.fillRect(0, 0, w, h);
   }
 }
 
-function drawBoat(playerId, x, y, rawName, lvl, title, defaultColor, boatId, rodId, isFishing) {
+// ================= โมเดลเรือ 3D หลายชั้นตามระดับเรือ =================
+function drawBoat3D(playerId, x, y, angle, rawName, lvl, title, defaultColor, boatId, rodId, isFishing, timeSec) {
   const isMax = lvl >= MAX_LEVEL;
   const hasGoldBoat = boatId === 5;
   const hasGodRod = rodId >= 5;
+  const bobOffset = Math.sin(timeSec * 3.2 + x * 0.02) * 2.5;
 
   if (isMax) spawnAuraParticles(x, y);
 
   ctx.save();
-  if (isMax || hasGoldBoat) {
-    ctx.shadowColor = "#ffd700";
-    ctx.shadowBlur = 16;
-  }
+  ctx.translate(x, y + bobOffset);
 
-  ctx.fillStyle = hasGoldBoat ? "#ffd700" : defaultColor;
+  // 1. เงาเรือตกกระทบผิวน้ำ 3D (Drop Shadow)
+  ctx.save();
+  ctx.rotate(angle);
+  ctx.fillStyle = "rgba(0, 8, 20, 0.38)";
   ctx.beginPath();
-  ctx.ellipse(x, y, hasGoldBoat ? 28 : 23, hasGoldBoat ? 13 : 11, 0, 0, Math.PI * 2);
+  ctx.ellipse(4, 10, 30 + boatId * 2, 13 + boatId, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  if (hasGoldBoat) {
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 2;
-    ctx.stroke();
+  // 2. ตัวถังเรือ 3D (Hull) แยกดีไซน์ตามระดับเรือ
+  if (isMax || hasGoldBoat) {
+    ctx.shadowColor = "#ffd700";
+    ctx.shadowBlur = 18;
   }
 
-  if (isFishing) {
-    ctx.strokeStyle = hasGodRod ? "#ffd700" : "#fff";
-    ctx.lineWidth = hasGodRod ? 3 : 2;
+  const hullLen = 28 + boatId * 2.5;
+  const hullWid = 12 + boatId * 0.8;
+
+  // สีตัวถังแบบ 3D Gradient
+  const hullGrad = ctx.createLinearGradient(0, -hullWid, 0, hullWid);
+  if (boatId === 5) { // เรือจักรพรรดิทองคำ
+    hullGrad.addColorStop(0, "#fff3a1");
+    hullGrad.addColorStop(0.5, "#ffd700");
+    hullGrad.addColorStop(1, "#b45309");
+  } else if (boatId === 4) { // เรือดำน้ำโบราณ
+    hullGrad.addColorStop(0, "#fde047");
+    hullGrad.addColorStop(0.5, "#ca8a04");
+    hullGrad.addColorStop(1, "#422006");
+  } else if (boatId === 3) { // เรือสำรวจน้ำลึก
+    hullGrad.addColorStop(0, "#f87171");
+    hullGrad.addColorStop(0.5, "#dc2626");
+    hullGrad.addColorStop(1, "#7f1d1d");
+  } else if (boatId === 2) { // สปีดโบ๊ท
+    hullGrad.addColorStop(0, "#ffffff");
+    hullGrad.addColorStop(0.5, "#38bdf8");
+    hullGrad.addColorStop(1, "#0369a1");
+  } else if (boatId === 1) { // เรือหางยาว
+    hullGrad.addColorStop(0, "#34d399");
+    hullGrad.addColorStop(0.5, "#059669");
+    hullGrad.addColorStop(1, "#064e3b");
+  } else { // เรือไม้พาย
+    hullGrad.addColorStop(0, "#d97706");
+    hullGrad.addColorStop(0.5, "#92400e");
+    hullGrad.addColorStop(1, "#451a03");
+  }
+
+  // วาดทรงเรือหัวแหลมท้ายตัดแบบ 3D
+  ctx.fillStyle = hullGrad;
+  ctx.beginPath();
+  ctx.moveTo(hullLen, 0); // หัวเรือแหลม
+  ctx.quadraticCurveTo(hullLen * 0.3, -hullWid, -hullLen * 0.85, -hullWid * 0.85);
+  ctx.lineTo(-hullLen, 0);
+  ctx.lineTo(-hullLen * 0.85, hullWid * 0.85);
+  ctx.quadraticCurveTo(hullLen * 0.3, hullWid, hullLen, 0);
+  ctx.closePath();
+  ctx.fill();
+
+  // ขอบกราบเรือ 3D
+  ctx.strokeStyle = hasGoldBoat ? "#ffffff" : "rgba(255,255,255,0.45)";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // 3. ดาดฟ้าเรือ / ห้องโดยสาร 3D (Deck & Cabin)
+  ctx.fillStyle = "rgba(15, 23, 42, 0.55)";
+  ctx.beginPath();
+  ctx.ellipse(-2, 0, hullLen * 0.58, hullWid * 0.55, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  if (boatId >= 2) {
+    // หลังคาเคบิน 3D
+    const cabinGrad = ctx.createLinearGradient(-10, -6, 8, 6);
+    cabinGrad.addColorStop(0, "#f8fafc");
+    cabinGrad.addColorStop(1, "#94a3b8");
+    ctx.fillStyle = cabinGrad;
     ctx.beginPath();
-    ctx.moveTo(x + 20, y);
-    ctx.lineTo(x + 42, y + 22);
+    ctx.roundRect(-10, -hullWid * 0.45, 16, hullWid * 0.9, 4);
+    ctx.fill();
+    // กระจกหน้าเรือ
+    ctx.fillStyle = "#0ea5e9";
+    ctx.fillRect(3, -hullWid * 0.35, 3, hullWid * 0.7);
+  }
+
+  // 4. ตัวละครกัปตัน 3D (หมวก + ไหล่)
+  ctx.fillStyle = defaultColor;
+  ctx.beginPath();
+  ctx.arc(boatId >= 2 ? -14 : 0, 0, 6.5, 0, Math.PI * 2);
+  ctx.fill();
+  // หมวกกัปตัน
+  ctx.fillStyle = isMax ? "#ffd700" : "#ffffff";
+  ctx.beginPath();
+  ctx.arc(boatId >= 2 ? -14 : 0, 0, 4.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore(); // คืนค่าการหมุนเรือ เพื่อวาดคันเบ็ดและป้ายชื่อให้ตั้งตรง
+
+  // 5. คันเบ็ด 3D และทุ่นลอยน้ำกระเพื่อม
+  if (isFishing) {
+    const rodTipX = x + Math.cos(angle) * 24 + 22;
+    const rodTipY = y + bobOffset + Math.sin(angle) * 24 - 18;
+    const bobberX = rodTipX + 18;
+    const bobberY = y + Math.sin(angle) * 24 + 20 + Math.sin(timeSec * 6) * 3;
+
+    // คันเบ็ด
+    ctx.strokeStyle = hasGodRod ? "#ffd700" : "#e2e8f0";
+    ctx.lineWidth = hasGodRod ? 3.5 : 2.5;
+    ctx.beginPath();
+    ctx.moveTo(x, y + bobOffset - 2);
+    ctx.lineTo(rodTipX, rodTipY);
     ctx.stroke();
 
+    // สายเอ็น
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(rodTipX, rodTipY);
+    ctx.lineTo(bobberX, bobberY);
+    ctx.stroke();
+
+    // วงกระเพื่อมรอบทุ่น
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.45)";
+    ctx.beginPath();
+    ctx.ellipse(bobberX, bobberY + 2, 7 + Math.sin(timeSec * 5) * 2, 3, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // ทุ่น 3D
     ctx.fillStyle = hasGodRod ? "#00f2fe" : "#ff4757";
     ctx.beginPath();
-    ctx.arc(x + 42, y + 22, 4, 0, Math.PI * 2);
+    ctx.arc(bobberX, bobberY, 4.5, 0, Math.PI * 2);
     ctx.fill();
   }
 
+  // 6. ป้ายชื่อและยศ 3D Floating Tag
   ctx.textAlign = "center";
-  if (isMax || title) {
-    const badge = title ? `🌟 [${title}]` : `👑 [เจ้าสมุทร]`;
-    ctx.fillStyle = "#ffd700";
-    ctx.font = "bold 12px sans-serif";
-    ctx.fillText(`${badge} ${rawName} (Lv.${lvl})`, x, y - 22);
-  } else {
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 12px sans-serif";
-    ctx.fillText(`${rawName} (Lv.${lvl})`, x, y - 18);
-  }
+  const labelText = (isMax || title)
+    ? `${title ? `🌟 [${title}]` : `👑 [เจ้าสมุทร]`} ${rawName} (Lv.${lvl})`
+    : `${rawName} (Lv.${lvl})`;
+
+  ctx.font = "bold 12px sans-serif";
+  const textW = ctx.measureText(labelText).width;
+  ctx.fillStyle = "rgba(6, 15, 30, 0.65)";
+  ctx.beginPath();
+  ctx.roundRect(x - textW / 2 - 7, y + bobOffset - 36, textW + 14, 18, 9);
+  ctx.fill();
+
+  ctx.fillStyle = (isMax || title) ? "#ffd700" : "#ffffff";
+  ctx.fillText(labelText, x, y + bobOffset - 23);
   ctx.restore();
 
+  // 7. กล่องข้อความแชทบนหัวเรือ
   const bubble = chatBubbles[playerId];
   if (bubble) {
     if (Date.now() < bubble.expiresAt) {
+      ctx.save();
       ctx.font = "12px sans-serif";
       const textWidth = ctx.measureText(bubble.text).width;
-      const boxW = textWidth + 18;
-      const boxH = 24;
+      const boxW = textWidth + 20;
+      const boxH = 25;
       const boxX = x - boxW / 2;
-      const boxY = y - 62;
+      const boxY = y + bobOffset - 68;
 
-      ctx.fillStyle = isMax ? "rgba(255, 248, 220, 0.96)" : "rgba(255, 255, 255, 0.95)";
+      ctx.shadowColor = "rgba(0,0,0,0.5)";
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = isMax ? "rgba(255, 248, 220, 0.96)" : "rgba(255, 255, 255, 0.96)";
       ctx.beginPath();
-      ctx.roundRect(boxX, boxY, boxW, boxH, 8);
+      ctx.roundRect(boxX, boxY, boxW, boxH, 10);
       ctx.fill();
 
       ctx.beginPath();
@@ -1223,14 +1659,15 @@ function drawBoat(playerId, x, y, rawName, lvl, title, defaultColor, boatId, rod
       ctx.closePath();
       ctx.fill();
 
+      ctx.shadowBlur = 0;
       ctx.fillStyle = "#0a192f";
       ctx.textAlign = "center";
       ctx.fillText(bubble.text, x, boxY + 16);
+      ctx.restore();
     } else {
       delete chatBubbles[playerId];
     }
   }
-  ctx.textAlign = "left";
 }
 </script>
 </body>
