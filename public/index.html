@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Ocean Master: Cozy Island Open World</title>
+<title>Ocean Master: Cozy Islands Expansion</title>
 <script src="/socket.io/socket.io.js"></script>
 <style>
   :root {
@@ -17,7 +17,6 @@
   * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
   body { background: #0c2b45; color: #fff; overflow: hidden; user-select: none; -webkit-user-select: none; touch-action: none; }
 
-  /* หน้าจอ Login สไตล์ RPG แฟนตาซีอบอุ่น */
   #login-screen {
     position: fixed; inset: 0;
     background: radial-gradient(circle at 50% 35%, rgba(28, 78, 108, 0.88), rgba(10, 26, 44, 0.96));
@@ -39,7 +38,6 @@
     box-shadow: inset 0 2px 6px rgba(0,0,0,0.15); outline: none;
   }
 
-  /* ปุ่มสไตล์ RPG น่ารักนูนมีมิติ */
   button {
     background: linear-gradient(180deg, #6ee7b7 0%, #10b981 100%);
     color: #06281e; border: 2px solid #047857; padding: 8px 12px;
@@ -60,7 +58,6 @@
   .error { color: #e11d48; font-size: 13px; margin-bottom: 10px; min-height: 20px; font-weight: bold; }
   #game-canvas { display: block; width: 100vw; height: 100vh; }
 
-  /* HUD ด้านบนสไตล์ Cozy RPG */
   #top-bar {
     position: fixed; top: 10px; left: 10px; right: 10px;
     display: flex; justify-content: space-between; align-items: flex-start; gap: 6px;
@@ -81,7 +78,6 @@
   #boss-alert { color: #fda4af; font-weight: 800; animation: pulse 1s infinite; display: none; font-size: 11.5px; }
   @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.45; } 100% { opacity: 1; } }
 
-  /* กระดานอันดับ */
   #leaderboard-panel {
     position: fixed; top: 96px; right: 10px; width: 195px;
     background: rgba(34, 24, 18, 0.76);
@@ -93,7 +89,15 @@
   .lb-row { display: flex; justify-content: space-between; margin-bottom: 2px; }
   .lb-max { color: #fde047; font-weight: bold; }
 
-  /* ปุ่มเดินวงกลม ฝั่งซ้าย */
+  /* ปุ่มเปลี่ยนชุด/ตัวละครด้านซ้าย */
+  #skin-switcher {
+    position: fixed; top: 104px; left: 12px;
+    background: rgba(34, 24, 18, 0.78);
+    border: 2px solid rgba(235, 198, 145, 0.45);
+    border-radius: 16px; padding: 6px 10px; z-index: 15;
+    display: flex; align-items: center; gap: 6px; font-size: 11px;
+  }
+
   #joystick-zone {
     position: fixed; bottom: 86px; left: 20px;
     width: 120px; height: 120px; border-radius: 50%;
@@ -117,7 +121,6 @@
     pointer-events: none; transform: translate(0px, 0px);
   }
 
-  /* ปุ่ม Action วงกลมฝั่งขวา */
   #action-orb-btn {
     position: fixed; bottom: 92px; right: 20px;
     width: 74px; height: 74px; border-radius: 50%;
@@ -134,7 +137,6 @@
     box-shadow: 0 8px 20px rgba(0,0,0,0.6), 0 0 18px rgba(250, 204, 21, 0.7);
   }
 
-  /* กล่องแชทขนาดกะทัดรัด */
   #chat-wrapper {
     position: fixed; bottom: 176px; right: 10px; width: 220px; max-width: 48vw;
     background: rgba(34, 24, 18, 0.74);
@@ -148,7 +150,6 @@
   #chat-input { flex: 1; background: transparent; border: none; color: #fff; padding: 6px 8px; font-size: 11px; outline: none; }
   #chat-send-btn { border-radius: 0; border: none; box-shadow: none; padding: 0 10px; font-size: 11px; }
 
-  /* แถบไอคอนเมนูด้านล่าง (Hotbar) */
   #bottom-controls {
     position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
     background: rgba(48, 32, 20, 0.85);
@@ -158,11 +159,10 @@
     display: flex; gap: 6px; justify-content: center; flex-wrap: nowrap; max-width: 96vw; overflow-x: auto; z-index: 25;
   }
   .hotbar-btn {
-    min-width: 54px; padding: 6px 8px; border-radius: 12px; font-size: 11px;
+    min-width: 52px; padding: 6px 8px; border-radius: 12px; font-size: 11px;
     display: flex; flex-direction: column; align-items: center; gap: 2px; white-space: nowrap;
   }
 
-  /* มินิเกมเย่อเบ็ด */
   #minigame-box {
     position: fixed; top: 42%; left: 50%; transform: translate(-50%, -50%);
     background: linear-gradient(180deg, #fff9ed 0%, #f3e4c8 100%);
@@ -179,7 +179,6 @@
   #target-zone { position: absolute; top: 0; bottom: 0; background: #22c55e; border-left: 2px solid #fff; border-right: 2px solid #fff; }
   #cursor-bar { position: absolute; top: 0; bottom: 0; width: 10px; background: #fff; box-shadow: 0 0 8px #000; left: 50%; }
 
-  /* หน้าต่าง Modal สไตล์สมุดบันทึกไม้/กระดาษครีม */
   .modal {
     position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
     background: linear-gradient(180deg, #fffaf0 0%, #f5e6cc 100%);
@@ -222,11 +221,11 @@
   <div id="login-screen">
     <div id="login-box">
       <div style="font-size: 44px; margin-bottom: 4px;">🏝️</div>
-      <h2 style="color: #7c4d2b; margin-bottom: 4px;">Ocean Master Island</h2>
-      <p style="font-size: 12.5px; color: #6e472b;">ผจญภัยเกาะเปิดกว้าง & ตกปลาออนไลน์</p>
-      <input type="text" id="username-input" placeholder="ตั้งชื่อนักผจญภัย..." maxlength="15">
+      <h2 style="color: #7c4d2b; margin-bottom: 4px;">Ocean Master Islands</h2>
+      <p style="font-size: 12.5px; color: #6e472b;">ผจญภัยหมู่เกาะแฟนตาซี & ตกปลาออนไลน์</p>
+      <input type="text" id="username-input" placeholder="ตั้งชื่อนักตกปลา..." maxlength="15">
       <div class="error" id="login-error"></div>
-      <button onclick="joinServer()" style="width:100%; padding:12px; font-size:15px;">✨ เข้าสู่เกาะสวรรค์</button>
+      <button onclick="joinServer()" style="width:100%; padding:12px; font-size:15px;">✨ เข้าสู่โลกหมู่เกาะ</button>
     </div>
   </div>
 
@@ -248,7 +247,7 @@
       </div>
       <div id="ui-zone" style="font-weight:bold; color:#fde047; font-size:12px; margin: 2px 0;">📍 โซน 1: บ่อน้ำกลางหมู่บ้าน</div>
       <div id="boss-timer" style="font-size: 10.5px; color: #d6bc94;">บอสเกิดใน: 60:00</div>
-      <div id="boss-alert">⚠️ บอสคราเคนปรากฏตัวที่ทะเลลึกทิศตะวันออก! ⚠️</div>
+      <div id="boss-alert">⚠️ บอสคราเคนปรากฏตัวที่ทะเลลึก! ⚠️</div>
     </div>
 
     <div class="panel" style="font-size: 11px;">
@@ -257,6 +256,13 @@
       <div>🪱 เหยื่อ: <span id="ui-bait">หนอน (10 ชิ้น)</span></div>
       <div>🧭 <span id="ui-relic" style="color:#fda4af;">❌ ยังไม่มีเข็มทิศซากเรือ</span></div>
     </div>
+  </div>
+
+  <!-- ปุ่มสลับชุดตัวละครด้านซ้าย -->
+  <div id="skin-switcher">
+    <button style="padding:3px 7px;" onclick="cycleSkin(-1)">◀</button>
+    <span id="ui-skin" style="font-weight:bold; color:#fde047;">🧢 นักตกปลาหมวกแดง</span>
+    <button style="padding:3px 7px;" onclick="cycleSkin(1)">▶</button>
   </div>
 
   <!-- กระดานอันดับ -->
@@ -337,7 +343,11 @@
     </button>
     <button class="hotbar-btn btn-gold" onclick="openModal('shop-modal')">
       <span style="font-size:15px;">🏪</span>
-      <span>ร้านค้า/เหยื่อ</span>
+      <span>ร้านค้า</span>
+    </button>
+    <button class="hotbar-btn btn-blue" onclick="openModal('map-modal')">
+      <span style="font-size:15px;">🗺️</span>
+      <span>แผนที่เกาะ</span>
     </button>
     <button class="hotbar-btn btn-blue" onclick="socket.emit('cycleWeather')">
       <span style="font-size:15px;">🌦️</span>
@@ -375,6 +385,16 @@
     <div class="dex-grid" id="dex-grid"></div>
   </div>
 
+  <!-- หน้าต่างแผนที่และวาร์ปเกาะ -->
+  <div class="modal" id="map-modal">
+    <div class="modal-header">
+      <h3>🗺️ แผนที่หมู่เกาะทั้งหมด</h3>
+      <button class="btn-red" style="padding:4px 10px;" onclick="closeModals()">X</button>
+    </div>
+    <p style="font-size:11px; color:#6e472b; margin-bottom:8px;">ล่องเรือออกสำรวจหรือกดเดินทางไปยังหมู่เกาะต่างๆ (ต้องมีเลเวลและเรือถึงเกณฑ์):</p>
+    <div id="island-list"></div>
+  </div>
+
   <!-- หน้าต่างร้านค้า -->
   <div class="modal" id="shop-modal">
     <div class="modal-header">
@@ -387,7 +407,7 @@
     <div id="shop-baits"></div>
     <h4 style="color: #7c4d2b; margin: 8px 0 4px;">⛵ เรือเดินสมุทร (ปลดล็อกน่านน้ำรอบเกาะ)</h4>
     <div id="shop-boats"></div>
-    <h4 style="color: #7c4d2b; margin: 8px 0 4px;">🎣 คันเบ็ด</h4>
+    <h4 style="color: #7c4d2b; margin: 8px 0 4px;">🎣 คันเบ็ด (อัปเกรด 4 ระดับ + เบ็ดตำนาน)</h4>
     <div id="shop-rods"></div>
   </div>
 
@@ -395,72 +415,95 @@
 const socket = io();
 const MAX_LEVEL = 100;
 
-// ================= 1. ฐานข้อมูลไอเทม =================
+// ================= 1. ฐานข้อมูลสกิน เรือ เบ็ด และเหยื่อ =================
+const SKINS = [
+  { id: 0, name: "🧢 นักตกปลาหมวกแดง", cap: "#dc2626", shirt: "#2dd4bf", pants: "#6b7280", hair: "#451a03" },
+  { id: 1, name: "👒 กัปตันหมวกฟาง", cap: "#eab308", shirt: "#3b82f6", pants: "#1e3a8a", hair: "#78350f" },
+  { id: 2, name: "🍬 นักสำรวจแคนดี้", cap: "#ec4899", shirt: "#f472b6", pants: "#a855f7", hair: "#fde047" },
+  { id: 3, name: "❄️ นักล่าขั้วโลก", cap: "#38bdf8", shirt: "#e0f2fe", pants: "#0369a1", hair: "#ffffff" }
+];
+
 const BOATS = [
-  { id: 0, name: "เรือไม้พาย (บ่อหมู่บ้าน & แม่น้ำ)", reqLvl: 1, price: 0, speed: 4.2, maxZone: 2 },
-  { id: 1, name: "เรือหางยาว (ชายหาดรอบเกาะ)", reqLvl: 25, price: 500, speed: 5.2, maxZone: 3 },
-  { id: 2, name: "เรือสปีดโบ๊ท (ทะเลเปิด)", reqLvl: 45, price: 2500, speed: 6.5, maxZone: 4 },
-  { id: 3, name: "เรือสำรวจน้ำลึก (ทะเลลึก)", reqLvl: 65, price: 8000, speed: 7.8, maxZone: 5 },
-  { id: 4, name: "เรือดำน้ำโบราณ (เกาะซากเรือ)", reqLvl: 85, price: 25000, speed: 9.0, maxZone: 6 },
-  { id: 5, name: "👑 เรือจักรพรรดิทองคำ [Lv.100]", reqLvl: 100, price: 0, speed: 10.5, maxZone: 6, exclusive: true }
+  { id: 0, name: "เรือไม้พาย (บ่อหมู่บ้าน & แม่น้ำ)", reqLvl: 1, price: 0, speed: 4.5, maxZone: 2 },
+  { id: 1, name: "เรือหางยาว (ชายหาด & เกาะป่าชายเลน)", reqLvl: 20, price: 500, speed: 5.5, maxZone: 3 },
+  { id: 2, name: "เรือสปีดโบ๊ท (ทะเลเปิด & เกาะน้ำแข็ง)", reqLvl: 40, price: 2500, speed: 6.8, maxZone: 4 },
+  { id: 3, name: "เรือสำรวจน้ำลึก (ทะเลลึก & เกาะภูเขาไฟ)", reqLvl: 60, price: 8000, speed: 8.2, maxZone: 5 },
+  { id: 4, name: "เรือดำน้ำโบราณ (เกาะซากเรือ & เกาะแคนดี้)", reqLvl: 80, price: 25000, speed: 9.5, maxZone: 6 },
+  { id: 5, name: "👑 เรือจักรพรรดิทองคำ [Lv.100]", reqLvl: 100, price: 0, speed: 11.0, maxZone: 6, exclusive: true }
 ];
 
 const RODS = [
-  { id: 0, name: "เบ็ดไม้ไผ่", reqLvl: 1, price: 0, power: 1, zoneSize: 28 },
-  { id: 1, name: "เบ็ดไฟเบอร์", reqLvl: 21, price: 400, power: 2, zoneSize: 32 },
-  { id: 2, name: "เบ็ดคาร์บอน", reqLvl: 41, price: 2000, power: 4, zoneSize: 36 },
-  { id: 3, name: "เบ็ดไทเทเนียม", reqLvl: 61, price: 7500, power: 7, zoneSize: 42 },
-  { id: 4, name: "เบ็ดคริสตัลตำนาน", reqLvl: 81, price: 20000, power: 10, zoneSize: 48 },
-  { id: 5, name: "🔱 ตรีศูลแห่งโพไซดอน [Lv.100]", reqLvl: 100, price: 0, power: 15, zoneSize: 58, exclusive: true },
-  { id: 6, name: "🌌 เบ็ดเทพเลวีอาธาน [สมุดปลา 100%]", reqLvl: 100, price: 0, power: 20, zoneSize: 68, exclusive: true, requiresFullDex: true }
+  { id: 0, name: "🪵 เบ็ดไม้ไผ่เริ่มต้น (Tier 1)", reqLvl: 1, price: 0, power: 1, zoneSize: 28, color: "#78350f" },
+  { id: 1, name: "💎 เบ็ดไฟเบอร์อควา (Tier 2)", reqLvl: 20, price: 400, power: 2.5, zoneSize: 33, color: "#06b6d4" },
+  { id: 2, name: "🖤 เบ็ดคาร์บอนดำทอง (Tier 3)", reqLvl: 40, price: 2000, power: 4.5, zoneSize: 38, color: "#eab308" },
+  { id: 3, name: "⚡ เบ็ดพลาสม่าเรืองแสง (Tier 4)", reqLvl: 60, price: 7500, power: 7.5, zoneSize: 44, color: "#38bdf8", glow: true },
+  { id: 4, name: "🔮 เบ็ดคริสตัลตำนาน", reqLvl: 80, price: 20000, power: 10, zoneSize: 49, color: "#c084fc", glow: true },
+  { id: 5, name: "🔱 ตรีศูลแห่งโพไซดอน [Lv.100]", reqLvl: 100, price: 0, power: 15, zoneSize: 58, color: "#fde047", glow: true, exclusive: true },
+  { id: 6, name: "🌌 เบ็ดเทพเลวีอาธาน [สมุดปลา 100%]", reqLvl: 100, price: 0, power: 20, zoneSize: 68, color: "#f472b6", glow: true, exclusive: true, requiresFullDex: true }
 ];
 
 const BAITS = [
   { id: 0, name: "🪱 หนอน", price: 5, targetDesc: "ปลาน้ำจืดทั่วไป", zoneDesc: "บ่อหมู่บ้าน, แม่น้ำ (โซน 1-2)", allowedZones: [1, 2], bonusDesc: "+10% อัตราการกัด", biteSpeedBonus: 0.10 },
-  { id: 1, name: "🦐 กุ้งสด", price: 15, targetDesc: "ปลากินเนื้อ, ปลาช่อน", zoneDesc: "แม่น้ำ, ชายหาด (โซน 2-3)", allowedZones: [2, 3], bonusDesc: "+15% ปลา Uncommon", rarityBoost: { uncommon: 1.15 } },
-  { id: 2, name: "🐟 ปลาเหยื่อ", price: 25, targetDesc: "ปลาใหญ่, ฉลาม", zoneDesc: "ทะเลเปิด (โซน 4)", allowedZones: [4], bonusDesc: "+20% ปลา Rare", rarityBoost: { rare: 1.20 } },
-  { id: 3, name: "✨ เหยื่อเรืองแสง", price: 60, targetDesc: "ปลาลึก, ปลา Mythic", zoneDesc: "ทะเลลึก, เกาะซากเรือ (โซน 5-6)", allowedZones: [5, 6], bonusDesc: "+30% ปลา Mythic", rarityBoost: { mythic: 1.30 } },
+  { id: 1, name: "🦐 กุ้งสด", price: 15, targetDesc: "ปลาทะเลตื้น, ปลาป่าชายเลน", zoneDesc: "แม่น้ำ, ชายหาด, ป่าชายเลน (โซน 2-3)", allowedZones: [2, 3], bonusDesc: "+15% ปลา Uncommon", rarityBoost: { uncommon: 1.15 } },
+  { id: 2, name: "🐟 ปลาเหยื่อ", price: 25, targetDesc: "ปลาทะเลเปิด, ปลาน้ำแข็ง", zoneDesc: "ทะเลเปิด, เกาะน้ำแข็ง (โซน 4)", allowedZones: [4], bonusDesc: "+20% ปลา Rare", rarityBoost: { rare: 1.20 } },
+  { id: 3, name: "✨ เหยื่อเรืองแสง", price: 60, targetDesc: "ปลาลึก, ปลาภูเขาไฟ, ปลาแคนดี้", zoneDesc: "ทะเลลึก, ภูเขาไฟ, ซากเรือ, แคนดี้ (โซน 5-6)", allowedZones: [5, 6], bonusDesc: "+30% ปลา Mythic", rarityBoost: { mythic: 1.30 } },
   { id: 4, name: "🍖 เหยื่อเนื้อ", price: 40, targetDesc: "ปลาปิรันย่า, ปลาดุก", zoneDesc: "บ่อ, แม่น้ำ (โซน 1-2)", allowedZones: [1, 2], bonusDesc: "+25% ปลากินเนื้อ", favFishIds: ["c3", "u4", "u5"] },
-  { id: 5, name: "🎣 เหยื่อปลอม", price: 80, targetDesc: "ปลาเร็ว, ปลากระโทง", zoneDesc: "ทะเลเปิด, ทะเลลึก (โซน 4-5)", allowedZones: [4, 5], bonusDesc: "+35% ปลา Legendary", rarityBoost: { legendary: 1.35 } },
-  { id: 6, name: "🧊 เหยื่อน้ำแข็ง", price: 50, targetDesc: "ปลาน้ำเย็น (ไวท์ฟิช)", zoneDesc: "ทะเลลึก (โซน 5)", allowedZones: [5], bonusDesc: "จำเป็นสำหรับปลาไวท์ฟิช", reqForFishId: "l5" }
+  { id: 5, name: "🎣 เหยื่อปลอม", price: 80, targetDesc: "ปลาเร็ว, ปลากระโทง, ปลาภูเขาไฟ", zoneDesc: "ทะเลเปิด, ทะเลลึก, ภูเขาไฟ (โซน 4-5)", allowedZones: [4, 5], bonusDesc: "+35% ปลา Legendary", rarityBoost: { legendary: 1.35 } },
+  { id: 6, name: "🧊 เหยื่อน้ำแข็ง", price: 50, targetDesc: "ปลาน้ำเย็น & เกาะน้ำแข็ง", zoneDesc: "เกาะน้ำแข็ง, ทะเลลึก (โซน 4-5)", allowedZones: [4, 5], bonusDesc: "จำเป็นสำหรับปลาไวท์ฟิช & ปลาคริสตัล", reqForFishId: "l5" },
+  { id: 7, name: "🍭 เหยื่อลูกกวาดสายรุ้ง", price: 90, targetDesc: "ปลาพิเศษประจำเกาะแคนดี้", zoneDesc: "เกาะแคนดี้ (โซน 6)", allowedZones: [6], bonusDesc: "+40% ปลาแคนดี้หายาก", favFishIds: ["cd1", "cd2", "cd3"] }
 ];
 
-// ================= 2. ฐานข้อมูลปลา 6 ระดับ =================
+// ================= 2. ฐานข้อมูลปลา (เพิ่มปลาประจำเกาะใหม่ครบชุด) =================
 const FISH_DB = [
-  { id: "c1", name: "ปลาซิว", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 1, subZone: "บ่อน้ำหมู่บ้าน", baseSize: "เล็ก", price: 5, exp: 15, weight: 50, speed: 1.4, favBaits: [0] },
-  { id: "c2", name: "ปลาตะเพียน", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 2, subZone: "แม่น้ำเกาะ", baseSize: "เล็ก–กลาง", price: 8, exp: 20, weight: 45, speed: 1.5, favBaits: [0] },
-  { id: "c3", name: "ปลาดุก", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 1, subZone: "บ่อน้ำหมู่บ้าน", baseSize: "กลาง", price: 12, exp: 25, weight: 40, speed: 1.6, favBaits: [0, 4] },
-  { id: "c4", name: "ปลาหมอ", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 1, subZone: "บ่อน้ำหมู่บ้าน", baseSize: "กลาง", price: 15, exp: 30, weight: 35, speed: 1.7, favBaits: [0] },
-  { id: "c5", name: "ปลาไหล", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 2, subZone: "แม่น้ำเกาะ", baseSize: "ยาว", price: 18, exp: 35, weight: 30, speed: 1.8, favBaits: [0] },
+  // โซน 1-2: เกาะหลัก
+  { id: "c1", name: "ปลาซิว", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 1, subZone: "บ่อน้ำหมู่บ้าน", price: 5, exp: 15, weight: 50, favBaits: [0] },
+  { id: "c2", name: "ปลาตะเพียน", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 2, subZone: "แม่น้ำเกาะ", price: 8, exp: 20, weight: 45, favBaits: [0] },
+  { id: "c3", name: "ปลาดุก", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 1, subZone: "บ่อน้ำหมู่บ้าน", price: 12, exp: 25, weight: 40, favBaits: [0, 4] },
+  { id: "c4", name: "ปลาหมอ", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 1, subZone: "บ่อน้ำหมู่บ้าน", price: 15, exp: 30, weight: 35, favBaits: [0] },
+  { id: "c5", name: "ปลาไหล", rarity: "common", rLabel: "🟢 ธรรมดา", zone: 2, subZone: "แม่น้ำเกาะ", price: 18, exp: 35, weight: 30, favBaits: [0] },
 
-  { id: "u1", name: "ปลาเสือ", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 2, subZone: "แม่น้ำเกาะ", baseSize: "กลาง–ใหญ่", price: 40, exp: 65, weight: 35, speed: 2.2, favBaits: [1, 4] },
-  { id: "u2", name: "ปลาเก๋า", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 3, subZone: "ชายหาดทราย", baseSize: "กลาง", price: 55, exp: 80, weight: 40, speed: 2.3, favBaits: [1] },
-  { id: "u3", name: "ปลากะพง", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 3, subZone: "ปากแม่น้ำ", baseSize: "ใหญ่", price: 70, exp: 95, weight: 35, speed: 2.4, favBaits: [1] },
-  { id: "u4", name: "ปลาช่อน", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 2, subZone: "แม่น้ำเกาะ", baseSize: "ยาว", price: 85, exp: 110, weight: 30, speed: 2.5, favBaits: [1, 4] },
-  { id: "u5", name: "ปลาปิรันย่า", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 2, subZone: "แม่น้ำป่า", baseSize: "กลาง", price: 100, exp: 130, weight: 25, speed: 2.7, favBaits: [4] },
+  // โซน 2-3: แม่น้ำ ชายหาด และเกาะป่าชายเลน (Mangrove)
+  { id: "u1", name: "ปลาเสือ", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 2, subZone: "แม่น้ำเกาะ", price: 40, exp: 65, weight: 35, favBaits: [1, 4] },
+  { id: "u2", name: "ปลาการ์ตูนส้ม", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 3, subZone: "ชายหาดปะการัง", price: 55, exp: 80, weight: 42, favBaits: [1] },
+  { id: "u3", name: "ปลากะพง", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 3, subZone: "ปากแม่น้ำ", price: 70, exp: 95, weight: 35, favBaits: [1] },
+  { id: "u4", name: "ปลาช่อน", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 2, subZone: "แม่น้ำเกาะ", price: 85, exp: 110, weight: 30, favBaits: [1, 4] },
+  { id: "u5", name: "ปลาปิรันย่า", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 2, subZone: "แม่น้ำป่า", price: 100, exp: 130, weight: 25, favBaits: [4] },
+  { id: "mg1", name: "ปลาตีนโคมไฟ", rarity: "uncommon", rLabel: "🔵 ไม่ธรรมดา", zone: 3, subZone: "เกาะป่าชายเลน", price: 120, exp: 150, weight: 35, favBaits: [1] },
+  { id: "mg2", name: "ปลาดุกโกงกางเรืองแสง", rarity: "rare", rLabel: "🟣 หายาก", zone: 3, subZone: "เกาะป่าชายเลน", price: 650, exp: 480, weight: 22, favBaits: [1, 3] },
 
-  { id: "r1", name: "ปลาแซลมอน", rarity: "rare", rLabel: "🟣 หายาก", zone: 2, subZone: "ต้นน้ำตก", baseSize: "ใหญ่", price: 250, exp: 220, weight: 22, speed: 3.1, favBaits: [1] },
-  { id: "r2", name: "ปลาทูน่า", rarity: "rare", rLabel: "🟣 หายาก", zone: 4, subZone: "ทะเลเปิด", baseSize: "ใหญ่มาก", price: 400, exp: 320, weight: 35, speed: 3.3, favBaits: [2, 5] },
-  { id: "r3", name: "ปลากระโทงแทง", rarity: "rare", rLabel: "🟣 หายาก", zone: 5, subZone: "ทะเลลึก", baseSize: "ยาวมาก", price: 550, exp: 420, weight: 30, speed: 3.5, favBaits: [5] },
-  { id: "r4", name: "ปลาฉลามเสือ", rarity: "rare", rLabel: "🟣 หายาก", zone: 3, subZone: "ชายหาดหิน", baseSize: "ใหญ่", price: 700, exp: 520, weight: 20, speed: 3.7, favBaits: [1] },
-  { id: "r5", name: "ปลาไพก์", rarity: "rare", rLabel: "🟣 หายาก", zone: 4, subZone: "ทะเลเปิด", baseSize: "ยาว", price: 800, exp: 600, weight: 25, speed: 3.8, favBaits: [2] },
+  // โซน 3-4: ทะเลเปิด และเกาะน้ำแข็ง (Frozen Isle)
+  { id: "r1", name: "ปลาแซลมอน", rarity: "rare", rLabel: "🟣 หายาก", zone: 2, subZone: "ต้นน้ำตก", price: 250, exp: 220, weight: 22, favBaits: [1] },
+  { id: "r2", name: "ปลาทูน่าครีบน้ำเงิน", rarity: "rare", rLabel: "🟣 หายาก", zone: 4, subZone: "ทะเลเปิด", price: 400, exp: 320, weight: 35, favBaits: [2, 5] },
+  { id: "r3", name: "ปลาบลูแทงค์ & เยลโลว์แทงค์", rarity: "rare", rLabel: "🟣 หายาก", zone: 4, subZone: "ทะเลเปิด", price: 520, exp: 400, weight: 30, favBaits: [2] },
+  { id: "r4", name: "ปลาฉลามเสือ", rarity: "rare", rLabel: "🟣 หายาก", zone: 3, subZone: "ชายหาดหิน", price: 700, exp: 520, weight: 20, favBaits: [1] },
+  { id: "r5", name: "ปลาปักเป้าหนาม", rarity: "rare", rLabel: "🟣 หายาก", zone: 4, subZone: "ทะเลเปิด", price: 800, exp: 600, weight: 25, favBaits: [2] },
+  { id: "fr1", name: "ปลาคริสตัลน้ำแข็ง", rarity: "rare", rLabel: "🟣 หายาก", zone: 4, subZone: "เกาะน้ำแข็ง", price: 950, exp: 720, weight: 26, favBaits: [2, 6] },
+  { id: "fr2", name: "ปลาวาฬเบลูก้าน้อย", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 4, subZone: "เกาะน้ำแข็ง", price: 3200, exp: 1800, weight: 14, favBaits: [6] },
 
-  { id: "l1", name: "ปลากระเบนยักษ์", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 2, subZone: "แม่น้ำลึก", baseSize: "ใหญ่", price: 1500, exp: 950, weight: 12, speed: 4.1, favBaits: [1, 4] },
-  { id: "l2", name: "ปลาฉลามขาว", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 4, subZone: "ทะเลเปิด", baseSize: "ใหญ่มาก", price: 2500, exp: 1400, weight: 18, speed: 4.3, favBaits: [2, 5] },
-  { id: "l3", name: "ปลาอาราไพมา", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 2, subZone: "แม่น้ำป่า", baseSize: "ยาวมาก", price: 3000, exp: 1700, weight: 10, speed: 4.4, favBaits: [4] },
-  { id: "l4", name: "ปลาหมึกยักษ์", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 5, subZone: "ทะเลลึก", baseSize: "ใหญ่", price: 4000, exp: 2100, weight: 20, speed: 4.6, favBaits: [3, 5] },
-  { id: "l5", name: "ปลาไวท์ฟิช", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 5, subZone: "ทะเลลึก", baseSize: "กลาง", price: 5000, exp: 2500, weight: 22, speed: 4.7, favBaits: [6], cond: "ice_bait", condText: "ต้องใช้ 🧊 เหยื่อน้ำแข็ง" },
+  // โซน 4-5: ทะเลลึก และเกาะภูเขาไฟ (Volcanic Isle)
+  { id: "l1", name: "ปลากระเบนยักษ์", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 2, subZone: "แม่น้ำลึก", price: 1500, exp: 950, weight: 12, favBaits: [1, 4] },
+  { id: "l2", name: "ปลาฉลามขาว", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 4, subZone: "ทะเลเปิด", price: 2500, exp: 1400, weight: 18, favBaits: [2, 5] },
+  { id: "l3", name: "ปลาอาราไพมา", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 2, subZone: "แม่น้ำป่า", price: 3000, exp: 1700, weight: 10, favBaits: [4] },
+  { id: "l4", name: "ปลาหมึกยักษ์", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 5, subZone: "ทะเลลึก", price: 4000, exp: 2100, weight: 20, favBaits: [3, 5] },
+  { id: "l5", name: "ปลาไวท์ฟิช", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 5, subZone: "ทะเลลึก", price: 5000, exp: 2500, weight: 22, favBaits: [6], cond: "ice_bait", condText: "ต้องใช้ 🧊 เหยื่อน้ำแข็ง" },
+  { id: "vl1", name: "ปลาไหลแมกม่า", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 5, subZone: "เกาะภูเขาไฟ", price: 5800, exp: 2900, weight: 18, favBaits: [3, 5] },
+  { id: "vl2", name: "ปลาแองเกลอร์ลาวา", rarity: "mythic", rLabel: "🔴 Mythic", zone: 5, subZone: "เกาะภูเขาไฟ", price: 13500, exp: 4800, weight: 12, favBaits: [3] },
 
-  { id: "m1", name: "ปลามังกร", rarity: "mythic", rLabel: "🔴 Mythic", zone: 6, subZone: "เกาะซากเรือ", baseSize: "ยาวมาก", price: 10000, exp: 4000, weight: 25, speed: 5.0, favBaits: [3], cond: "night", condText: "กลางคืนเท่านั้น" },
-  { id: "m2", name: "ปลาเรืองแสง", rarity: "mythic", rLabel: "🔴 Mythic", zone: 5, subZone: "ทะเลลึก", baseSize: "กลาง", price: 12000, exp: 4500, weight: 25, speed: 5.1, favBaits: [3], cond: "rain", condText: "ฝนตกเท่านั้น" },
-  { id: "m3", name: "ปลาโบราณ", rarity: "mythic", rLabel: "🔴 Mythic", zone: 6, subZone: "ซากเรือจม", baseSize: "ใหญ่", price: 15000, exp: 5200, weight: 25, speed: 5.2, favBaits: [3], cond: "relic", condText: "ต้องมีเข็มทิศซากเรือ" },
-  { id: "m4", name: "ปลาวิญญาณ", rarity: "mythic", rLabel: "🔴 Mythic", zone: 6, subZone: "เกาะซากเรือ", baseSize: "ลึกลับ", price: 20000, exp: 6500, weight: 8, speed: 5.4, favBaits: [3], cond: "fog", condText: "หมอกลงเท่านั้น" },
+  // โซน 5-6: เกาะซากเรือ & เกาะแคนดี้ (Candy Isle)
+  { id: "m1", name: "ปลามังกร", rarity: "mythic", rLabel: "🔴 Mythic", zone: 6, subZone: "เกาะซากเรือ", price: 10000, exp: 4000, weight: 25, favBaits: [3], cond: "night", condText: "กลางคืนเท่านั้น" },
+  { id: "m2", name: "ปลาแองเกลอร์เรืองแสง", rarity: "mythic", rLabel: "🔴 Mythic", zone: 5, subZone: "ทะเลลึก", price: 12000, exp: 4500, weight: 25, favBaits: [3], cond: "rain", condText: "ฝนตกเท่านั้น" },
+  { id: "m3", name: "ปลาโบราณ", rarity: "mythic", rLabel: "🔴 Mythic", zone: 6, subZone: "ซากเรือจม", price: 15000, exp: 5200, weight: 25, favBaits: [3], cond: "relic", condText: "ต้องมีเข็มทิศซากเรือ" },
+  { id: "m4", name: "ปลาวิญญาณ", rarity: "mythic", rLabel: "🔴 Mythic", zone: 6, subZone: "เกาะซากเรือ", price: 20000, exp: 6500, weight: 8, favBaits: [3], cond: "fog", condText: "หมอกลงเท่านั้น" },
+  { id: "cd1", name: "ปลากัมมี่การ์ตูน", rarity: "rare", rLabel: "🟣 หายาก", zone: 6, subZone: "เกาะแคนดี้", price: 1800, exp: 1100, weight: 30, favBaits: [7] },
+  { id: "cd2", name: "ปลาโลมาสายไหม", rarity: "legendary", rLabel: "🟠 ตำนาน", zone: 6, subZone: "เกาะแคนดี้", price: 6500, exp: 3200, weight: 18, favBaits: [7] },
+  { id: "cd3", name: "ปลาแองเกลอร์นีออนแคนดี้", rarity: "mythic", rLabel: "🔴 Mythic", zone: 6, subZone: "เกาะแคนดี้", price: 18000, exp: 5800, weight: 14, favBaits: [3, 7] },
 
-  { id: "g1", name: "ราชาแห่งท้องทะเล", rarity: "god", rLabel: "🌟 God-tier", zone: 6, subZone: "เกาะซากเรือ", baseSize: "มหึมา", price: 50000, exp: 0, weight: 10, speed: 5.8, favBaits: [3], cond: "god_seaking", condText: "Lv.100 (มีตัวเดียวในเซิร์ฟเวอร์)" },
-  { id: "g2", name: "ปลาเลวีอาธาน", rarity: "god", rLabel: "🌟 God-tier", zone: 6, subZone: "เกาะซากเรือ", baseSize: "เทวะ", price: 80000, exp: 0, weight: 15, speed: 6.0, favBaits: [3], cond: "god_leviathan", condText: "Lv.100 + สะสมปลาครบทุกสายพันธุ์" }
+  // God-tier
+  { id: "g1", name: "ราชาแห่งท้องทะเล", rarity: "god", rLabel: "🌟 God-tier", zone: 6, subZone: "เกาะซากเรือ", price: 50000, exp: 0, weight: 10, favBaits: [3], cond: "god_seaking", condText: "Lv.100 (มีตัวเดียวในเซิร์ฟเวอร์)" },
+  { id: "g2", name: "ปลาเลวีอาธาน", rarity: "god", rLabel: "🌟 God-tier", zone: 6, subZone: "เกาะซากเรือ", price: 80000, exp: 0, weight: 15, favBaits: [3], cond: "god_leviathan", condText: "Lv.100 + สะสมปลาครบทุกสายพันธุ์" }
 ];
 
-const BOSS_FISH = { id: "boss_kraken", name: "👑 บอสปลาหมึกยักษ์คราเคน", rarity: "god", rLabel: "👑 WORLD BOSS", price: 15000, exp: 5000, speed: 5.5, isBoss: true };
+const BOSS_FISH = { id: "boss_kraken", name: "👑 บอสปลาหมึกยักษ์คราเคน", rarity: "god", rLabel: "👑 WORLD BOSS", price: 15000, exp: 5000, isBoss: true };
 
 const SIZE_MODIFIERS = [
   { label: "เล็ก (Small)",     weightMult: 0.5, priceMult: 0.6, chance: 0.40, color: "#64748b" },
@@ -470,38 +513,40 @@ const SIZE_MODIFIERS = [
   { label: "ตำนาน (Trophy)",  weightMult: 4.0, priceMult: 8.0, chance: 0.01, color: "#b45309" }
 ];
 
-// ================= 3. แผนที่เกาะ Open World (2400 x 1800) =================
-const WORLD_W = 2400;
-const WORLD_H = 1800;
+// ================= 3. แผนที่หมู่เกาะ Open World (3200 x 2400) =================
+const WORLD_W = 3200;
+const WORLD_H = 2400;
 const ISLAND_CX = 1150;
 const ISLAND_CY = 900;
-const ISLAND_RX = 680;
-const ISLAND_RY = 510;
-const VILLAGE_POND = { x: 1120, y: 920, rx: 145, ry: 105 };
+const ISLAND_RX = 640;
+const ISLAND_RY = 480;
+const VILLAGE_POND = { x: 1120, y: 920, rx: 140, ry: 100 };
+
+// พิกัดหมู่เกาะใหม่ทั้งหมด
+const SPECIAL_ISLANDS = [
+  { id: "home", name: "🏝️ เกาะหลัก (Home Isle)", x: 965, y: 905, reqLvl: 1, zone: 1, desc: "บ่อน้ำหมู่บ้าน ร้านค้า แม่น้ำใส และชายหาด" },
+  { id: "mangrove", name: "🌿 เกาะป่าชายเลน (Mangrove Isle)", x: 520, y: 1780, rx: 220, ry: 165, reqLvl: 20, zone: 3, desc: "รากไม้โกงกาง โคมไฟเรืองแสง และปลาป่าชายเลน" },
+  { id: "frozen", name: "❄️ เกาะน้ำแข็ง (Frozen Isle)", x: 2450, y: 480, rx: 230, ry: 170, reqLvl: 40, zone: 4, desc: "บ้านอิกลู ต้นสนหิมะ และผลึกคริสตัลน้ำแข็ง" },
+  { id: "volcanic", name: "🌋 เกาะภูเขาไฟ (Volcanic Isle)", x: 2650, y: 1220, rx: 240, ry: 175, reqLvl: 60, zone: 5, desc: "โขดหินภูเขาไฟ ธารลาวา และปลาแมกม่าหายาก" },
+  { id: "shipwreck", name: "🏴‍☠️ เกาะซากเรือจม (Shipwreck Isle)", x: 1850, y: 1850, rx: 180, ry: 130, reqLvl: 80, zone: 6, desc: "ซากเรือโจรสลัดโบราณ แหล่งรวมปลา Mythic & God" },
+  { id: "candy", name: "🍭 เกาะแคนดี้ (Candy Isle)", x: 2680, y: 1920, rx: 245, ry: 180, reqLvl: 80, zone: 6, desc: "บ้านขนมปังขิง ต้นสายไหม เยลลี่หมี และอมยิ้มยักษ์" }
+];
 
 const ISLAND_PROPS = {
   trees: [
     { x: 820, y: 720, s: 1.1 }, { x: 880, y: 670, s: 0.95 }, { x: 960, y: 630, s: 1.15 },
     { x: 1320, y: 650, s: 1.1 }, { x: 1420, y: 710, s: 1.0 }, { x: 1480, y: 800, s: 1.2 },
     { x: 760, y: 950, s: 1.05 }, { x: 810, y: 1080, s: 1.15 }, { x: 930, y: 1180, s: 1.0 },
-    { x: 1380, y: 1120, s: 1.15 }, { x: 1490, y: 1020, s: 0.95 }, { x: 1220, y: 1220, s: 1.05 },
-    { x: 1050, y: 680, s: 0.9 }, { x: 1290, y: 810, s: 0.95 }
+    { x: 1380, y: 1120, s: 1.15 }, { x: 1490, y: 1020, s: 0.95 }, { x: 1220, y: 1220, s: 1.05 }
   ],
   rocks: [
     { x: 985, y: 885, s: 1.0 }, { x: 1255, y: 870, s: 1.15 }, { x: 1210, y: 1015, s: 0.95 },
-    { x: 1010, y: 995, s: 0.85 }, { x: 1620, y: 860, s: 1.3 }, { x: 1660, y: 980, s: 1.1 },
-    { x: 650, y: 850, s: 1.2 }, { x: 1140, y: 1320, s: 1.25 }
-  ],
-  reeds: [
-    { x: 1215, y: 860 }, { x: 1235, y: 875 }, { x: 1020, y: 980 }, { x: 1040, y: 995 },
-    { x: 1330, y: 910 }, { x: 1460, y: 930 }
+    { x: 1010, y: 995, s: 0.85 }, { x: 1620, y: 860, s: 1.3 }, { x: 650, y: 850, s: 1.2 }
   ],
   flowers: [
     { x: 960, y: 895, c: "#fff" }, { x: 945, y: 915, c: "#fde047" }, { x: 1035, y: 835, c: "#f472b6" },
-    { x: 1180, y: 805, c: "#fff" }, { x: 1265, y: 965, c: "#fde047" }, { x: 1080, y: 1040, c: "#fff" },
-    { x: 890, y: 840, c: "#f472b6" }, { x: 1360, y: 1030, c: "#fff" }
-  ],
-  shipwreckIsland: { x: 2040, y: 1360, rx: 160, ry: 115 }
+    { x: 1180, y: 805, c: "#fff" }, { x: 1265, y: 965, c: "#fde047" }, { x: 1080, y: 1040, c: "#fff" }
+  ]
 };
 
 const NPCS = [
@@ -515,8 +560,8 @@ let otherPlayers = {};
 let playerFacing = {};
 let chatBubbles = {};
 let ambientFish = [];
-let camera = { x: 1120, y: 900 };
-let world = { timeMinutes: 480, isNight: false, weather: 'clear', bossActive: false, bossSecondsLeft: 3600, bossX: 1950, bossY: 750, seaKingCaughtBy: null };
+let camera = { x: 965, y: 905 };
+let world = { timeMinutes: 480, isNight: false, weather: 'clear', bossActive: false, bossSecondsLeft: 3600, bossX: 2150, bossY: 950, seaKingCaughtBy: null };
 const keys = {};
 let fishingTimer = null;
 let joystick = { active: false, dx: 0, dy: 0, touchId: null };
@@ -529,55 +574,78 @@ let minigame = {
   struggleInterval: 1.5, struggleTimer: 0, snapTime: 2.0, dangerTimer: 0
 };
 
-// ================= ตรวจสอบภูมิประเทศบนเกาะ =================
+// ================= ตรวจสอบภูมิประเทศหมู่เกาะ =================
 function getTerrainInfo(x, y) {
+  // 1. บ่อหมู่บ้าน
   const dPond = Math.pow((x - VILLAGE_POND.x) / VILLAGE_POND.rx, 2) + Math.pow((y - VILLAGE_POND.y) / VILLAGE_POND.ry, 2);
-  if (dPond <= 1.0) {
-    return { isWater: true, zone: 1, name: "โซน 1: บ่อน้ำกลางหมู่บ้าน (Lv.1+)", reqLvl: 1 };
-  }
+  if (dPond <= 1.0) return { isWater: true, zone: 1, name: "โซน 1: บ่อน้ำกลางหมู่บ้าน (Lv.1+)", reqLvl: 1 };
 
-  if (x >= VILLAGE_POND.x + 80 && x <= ISLAND_CX + ISLAND_RX + 20 && Math.abs(y - 920) <= 48) {
+  // 2. แม่น้ำเกาะหลัก
+  if (x >= VILLAGE_POND.x + 80 && x <= ISLAND_CX + ISLAND_RX + 20 && Math.abs(y - 920) <= 46) {
     return { isWater: true, zone: 2, name: "โซน 2: แม่น้ำใสของเกาะ (Lv.10+)", reqLvl: 10 };
   }
 
-  const dWreck = Math.hypot(x - ISLAND_PROPS.shipwreckIsland.x, y - ISLAND_PROPS.shipwreckIsland.y);
-  if (dWreck <= 320) {
-    const onWreckLand = Math.pow((x - ISLAND_PROPS.shipwreckIsland.x) / 130, 2) + Math.pow((y - ISLAND_PROPS.shipwreckIsland.y) / 90, 2) <= 1.0;
-    return { isWater: !onWreckLand, zone: 6, name: "โซน 6: เกาะซากเรือจม (Lv.85+)", reqLvl: 85 };
+  // 3. เกาะป่าชายเลน (Mangrove Isle)
+  const mg = SPECIAL_ISLANDS[1];
+  const dMg = Math.pow((x - mg.x) / mg.rx, 2) + Math.pow((y - mg.y) / mg.ry, 2);
+  if (dMg <= 1.65) {
+    return { isWater: dMg > 0.85, zone: 3, name: "โซน 3: เกาะป่าชายเลนเรืองแสง (Lv.20+)", reqLvl: 20, nearWater: dMg >= 0.55, castDir: { x: x - mg.x, y: y - mg.y } };
   }
 
+  // 4. เกาะน้ำแข็ง (Frozen Isle)
+  const fr = SPECIAL_ISLANDS[2];
+  const dFr = Math.pow((x - fr.x) / fr.rx, 2) + Math.pow((y - fr.y) / fr.ry, 2);
+  if (dFr <= 1.65) {
+    return { isWater: dFr > 0.85, zone: 4, name: "โซน 4: เกาะน้ำแข็งคริสตัล (Lv.40+)", reqLvl: 40, nearWater: dFr >= 0.55, castDir: { x: x - fr.x, y: y - fr.y } };
+  }
+
+  // 5. เกาะภูเขาไฟ (Volcanic Isle)
+  const vl = SPECIAL_ISLANDS[3];
+  const dVl = Math.pow((x - vl.x) / vl.rx, 2) + Math.pow((y - vl.y) / vl.ry, 2);
+  if (dVl <= 1.65) {
+    return { isWater: dVl > 0.85, zone: 5, name: "โซน 5: เกาะภูเขาไฟลาวา (Lv.60+)", reqLvl: 60, nearWater: dVl >= 0.55, castDir: { x: x - vl.x, y: y - vl.y } };
+  }
+
+  // 6. เกาะซากเรือจม (Shipwreck Isle)
+  const sw = SPECIAL_ISLANDS[4];
+  const dSw = Math.pow((x - sw.x) / sw.rx, 2) + Math.pow((y - sw.y) / sw.ry, 2);
+  if (dSw <= 1.65) {
+    return { isWater: dSw > 0.85, zone: 6, name: "โซน 6: เกาะซากเรือจม (Lv.80+)", reqLvl: 80, nearWater: dSw >= 0.55, castDir: { x: x - sw.x, y: y - sw.y } };
+  }
+
+  // 7. เกาะแคนดี้ (Candy Isle)
+  const cd = SPECIAL_ISLANDS[5];
+  const dCd = Math.pow((x - cd.x) / cd.rx, 2) + Math.pow((y - cd.y) / cd.ry, 2);
+  if (dCd <= 1.65) {
+    return { isWater: dCd > 0.85, zone: 6, name: "โซน 6: เกาะแคนดี้สายไหม (Lv.80+)", reqLvl: 80, nearWater: dCd >= 0.55, castDir: { x: x - cd.x, y: y - cd.y } };
+  }
+
+  // 8. เกาะหลัก (Home Isle)
   const dIsland = Math.pow((x - ISLAND_CX) / ISLAND_RX, 2) + Math.pow((y - ISLAND_CY) / ISLAND_RY, 2);
   if (dIsland <= 1.0) {
     if (dPond <= 1.65) return { isWater: false, zone: 1, name: "โซน 1: ริมบ่อน้ำหมู่บ้าน (Lv.1+)", reqLvl: 1, nearWater: true, castDir: { x: VILLAGE_POND.x - x, y: VILLAGE_POND.y - y } };
     if (x >= VILLAGE_POND.x + 60 && Math.abs(y - 920) <= 95) return { isWater: false, zone: 2, name: "โซน 2: ริมแม่น้ำเกาะ (Lv.10+)", reqLvl: 10, nearWater: true, castDir: { x: 0, y: 920 - y } };
-    if (dIsland >= 0.74) return { isWater: false, zone: 3, name: "โซน 3: ชายหาดรอบเกาะ (Lv.25+)", reqLvl: 25, nearWater: true, castDir: { x: x - ISLAND_CX, y: y - ISLAND_CY } };
-    return { isWater: false, zone: 1, name: "หมู่บ้านเกาะสวรรค์ (เดินไปริมน้ำเพื่อตกปลา)", reqLvl: 1, nearWater: false };
+    if (dIsland >= 0.72) return { isWater: false, zone: 3, name: "โซน 3: ชายหาดเกาะหลัก (Lv.20+)", reqLvl: 20, nearWater: true, castDir: { x: x - ISLAND_CX, y: y - ISLAND_CY } };
+    return { isWater: false, zone: 1, name: "เกาะหลัก (เดินไปริมน้ำหรือล่องเรือสำรวจเกาะอื่น)", reqLvl: 1, nearWater: false };
   }
 
-  if (dIsland <= 1.55) return { isWater: true, zone: 3, name: "โซน 3: ชายฝั่งทะเลตื้น (Lv.25+)", reqLvl: 25 };
-  if (dIsland <= 2.45) return { isWater: true, zone: 4, name: "โซน 4: ทะเลเปิดรอบเกาะ (Lv.45+)", reqLvl: 45 };
-  return { isWater: true, zone: 5, name: "โซน 5: ทะเลลึกสีคราม (Lv.65+)", reqLvl: 65 };
+  // 9. น่านน้ำทะเลรอบหมู่เกาะ
+  if (dIsland <= 1.55) return { isWater: true, zone: 3, name: "โซน 3: ชายฝั่งทะเลตื้น (Lv.20+)", reqLvl: 20 };
+  if (dIsland <= 2.45) return { isWater: true, zone: 4, name: "โซน 4: ทะเลเปิดรอบหมู่เกาะ (Lv.40+)", reqLvl: 40 };
+  return { isWater: true, zone: 5, name: "โซน 5: ทะเลลึกสีคราม (Lv.60+)", reqLvl: 60 };
 }
 
-// ================= ปุ่มเดินวงกลม (Virtual Joystick) =================
+// ================= Virtual Joystick & Canvas =================
 const joyZone = document.getElementById("joystick-zone");
 const joyKnob = document.getElementById("joystick-knob");
 
 function handleJoystickMove(clientX, clientY) {
   const rect = joyZone.getBoundingClientRect();
-  const centerX = rect.left + rect.width / 2;
-  const centerY = rect.top + rect.height / 2;
   const maxRadius = rect.width * 0.36;
-
-  let rawX = clientX - centerX;
-  let rawY = clientY - centerY;
+  let rawX = clientX - (rect.left + rect.width / 2);
+  let rawY = clientY - (rect.top + rect.height / 2);
   const dist = Math.hypot(rawX, rawY);
-
-  if (dist > maxRadius) {
-    rawX = (rawX / dist) * maxRadius;
-    rawY = (rawY / dist) * maxRadius;
-  }
-
+  if (dist > maxRadius) { rawX = (rawX / dist) * maxRadius; rawY = (rawY / dist) * maxRadius; }
   joyKnob.style.transition = "none";
   joyKnob.style.transform = `translate(${rawX}px, ${rawY}px)`;
   joystick.dx = rawX / maxRadius;
@@ -585,34 +653,29 @@ function handleJoystickMove(clientX, clientY) {
 }
 
 function resetJoystick() {
-  joystick.active = false;
-  joystick.dx = 0; joystick.dy = 0; joystick.touchId = null;
+  joystick.active = false; joystick.dx = 0; joystick.dy = 0; joystick.touchId = null;
   joyKnob.style.transition = "transform 0.14s cubic-bezier(0.2, 0.8, 0.2, 1)";
   joyKnob.style.transform = "translate(0px, 0px)";
 }
 
 joyZone.addEventListener("touchstart", (e) => {
   e.preventDefault();
-  const touch = e.changedTouches[0];
-  joystick.active = true;
-  joystick.touchId = touch.identifier;
-  handleJoystickMove(touch.clientX, touch.clientY);
+  const t = e.changedTouches[0];
+  joystick.active = true; joystick.touchId = t.identifier;
+  handleJoystickMove(t.clientX, t.clientY);
 }, { passive: false });
 
 window.addEventListener("touchmove", (e) => {
   if (!joystick.active) return;
-  for (let i = 0; i < e.changedTouches.length; i++) {
-    if (e.changedTouches[i].identifier === joystick.touchId) {
-      handleJoystickMove(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
-      break;
-    }
+  for (let t of e.changedTouches) {
+    if (t.identifier === joystick.touchId) { handleJoystickMove(t.clientX, t.clientY); break; }
   }
 }, { passive: false });
 
 window.addEventListener("touchend", (e) => {
   if (!joystick.active) return;
-  for (let i = 0; i < e.changedTouches.length; i++) {
-    if (e.changedTouches[i].identifier === joystick.touchId) { resetJoystick(); break; }
+  for (let t of e.changedTouches) {
+    if (t.identifier === joystick.touchId) { resetJoystick(); break; }
   }
 });
 
@@ -631,10 +694,7 @@ canvas.addEventListener("click", (e) => {
   const worldClickX = e.clientX + (camera.x - canvas.width / 2);
   const worldClickY = e.clientY + (camera.y - canvas.height / 2);
   for (let npc of NPCS) {
-    if (Math.hypot(worldClickX - npc.x, worldClickY - npc.y) < 65) {
-      openModal(npc.action);
-      return;
-    }
+    if (Math.hypot(worldClickX - npc.x, worldClickY - npc.y) < 65) { openModal(npc.action); return; }
   }
 });
 
@@ -649,25 +709,21 @@ socket.on("joinSuccess", (data) => {
     x: 965, y: 905,
     facing: 1,
     bobberX: 1055, bobberY: 935,
-    exp: 0, money: 50, rod: 0, bait: 0,
+    exp: 0, money: 50, rod: 0, bait: 0, skin: 0,
     hasRelic: false,
     ownedBoats: [0], ownedRods: [0],
-    baitCounts: { 0: 10, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 },
+    baitCounts: { 0: 10, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 },
     bag: [],
     caughtSpecies: []
   };
-  camera.x = myPlayer.x;
-  camera.y = myPlayer.y;
+  camera.x = myPlayer.x; camera.y = myPlayer.y;
   world = data.world;
   otherPlayers = data.allPlayers;
   delete otherPlayers[myPlayer.id];
 
   initAmbientFish();
   document.getElementById("login-screen").style.display = "none";
-  updateOnlineCount();
-  updateUI();
-  renderShop();
-  syncMyState();
+  updateOnlineCount(); updateUI(); renderShop(); syncMyState();
   requestAnimationFrame(gameLoop);
 });
 
@@ -751,18 +807,24 @@ window.addEventListener("keyup", e => {
   if (e.code === "Space") isReeling = false;
 });
 
-// ================= ระบบเดินบนเกาะ & ขับเรือออกทะเล =================
+function cycleSkin(dir) {
+  if (!myPlayer) return;
+  myPlayer.skin = (myPlayer.skin + dir + SKINS.length) % SKINS.length;
+  document.getElementById("ui-skin").innerText = SKINS[myPlayer.skin].name;
+  syncMyState();
+}
+
+// ================= ระบบเดินบนเกาะ & ล่องเรือข้ามหมู่เกาะ =================
 function updateMovement() {
   if (!myPlayer || myPlayer.isFishing || minigame.active) return;
   if (document.activeElement === document.getElementById("chat-input")) return;
 
   const currentTerrain = getTerrainInfo(myPlayer.x, myPlayer.y);
-  const speed = currentTerrain.isWater ? BOATS[myPlayer.boat].speed : 4.2;
+  const speed = currentTerrain.isWater ? BOATS[myPlayer.boat].speed : 4.5;
 
   let vx = 0, vy = 0;
   if (joystick.active && (Math.abs(joystick.dx) > 0.08 || Math.abs(joystick.dy) > 0.08)) {
-    vx = joystick.dx * speed;
-    vy = joystick.dy * speed;
+    vx = joystick.dx * speed; vy = joystick.dy * speed;
   } else {
     if (keys["w"] || keys["arrowup"]) vy -= 1;
     if (keys["s"] || keys["arrowdown"]) vy += 1;
@@ -770,8 +832,7 @@ function updateMovement() {
     if (keys["d"] || keys["arrowright"]) vx += 1;
     if (vx !== 0 || vy !== 0) {
       const len = Math.hypot(vx, vy);
-      vx = (vx / len) * speed;
-      vy = (vy / len) * speed;
+      vx = (vx / len) * speed; vy = (vy / len) * speed;
     }
   }
 
@@ -786,23 +847,20 @@ function updateMovement() {
     const canEnterZone = myPlayer.lvl >= nextTerrain.reqLvl && (!nextTerrain.isWater || nextTerrain.zone <= BOATS[myPlayer.boat].maxZone);
 
     if (canEnterZone) {
-      myPlayer.x = nextX;
-      myPlayer.y = nextY;
+      myPlayer.x = nextX; myPlayer.y = nextY;
       syncMyState();
     }
   }
 
   camera.x += (myPlayer.x - camera.x) * 0.12;
   camera.y += (myPlayer.y - camera.y) * 0.12;
-
-  const updatedTerrain = getTerrainInfo(myPlayer.x, myPlayer.y);
-  document.getElementById("ui-zone").innerText = "📍 " + updatedTerrain.name;
+  document.getElementById("ui-zone").innerText = "📍 " + getTerrainInfo(myPlayer.x, myPlayer.y).name;
 }
 
 function syncMyState() {
   socket.emit("updateState", {
     x: myPlayer.x, y: myPlayer.y,
-    boat: myPlayer.boat, rod: myPlayer.rod,
+    boat: myPlayer.boat, rod: myPlayer.rod, skin: myPlayer.skin,
     lvl: myPlayer.lvl, title: myPlayer.title,
     isFishing: myPlayer.isFishing
   });
@@ -825,7 +883,7 @@ function toggleFishing() {
 
   const terrain = getTerrainInfo(myPlayer.x, myPlayer.y);
   if (!terrain.isWater && !terrain.nearWater) {
-    addLog("🚶 เดินไปที่ริมบ่อน้ำ แม่น้ำ ชายหาด หรือลงเรือออกทะเลก่อนหย่อนเบ็ดครับ!", "#fde047");
+    addLog("🚶 เดินไปที่ริมน้ำ ชายหาดของเกาะ หรือลงเรือออกทะเลก่อนหย่อนเบ็ดครับ!", "#fde047");
     return;
   }
 
@@ -858,7 +916,7 @@ function toggleFishing() {
   orbLabel.innerText = "รอปลา...";
   syncMyState();
 
-  let waitTime = Math.max(1000, 3000 - (RODS[myPlayer.rod].power * 150));
+  let waitTime = Math.max(900, 2800 - (RODS[myPlayer.rod].power * 130));
   if (activeBait.biteSpeedBonus) waitTime = Math.round(waitTime * (1 - activeBait.biteSpeedBonus));
   fishingTimer = setTimeout(startMinigame, waitTime);
 }
@@ -890,7 +948,8 @@ function generateFishCombatStats(fish, weightMult) {
 
 function startMinigame() {
   if (!myPlayer.isFishing) return;
-  const currentZone = getTerrainInfo(myPlayer.x, myPlayer.y).zone;
+  const terrain = getTerrainInfo(myPlayer.x, myPlayer.y);
+  const currentZone = terrain.zone;
   const currentBait = BAITS[myPlayer.bait];
   let selectedFish = null;
 
@@ -915,9 +974,9 @@ function startMinigame() {
     let weightedPool = validPool.map(f => {
       let w = f.weight;
       if (currentBait.rarityBoost && currentBait.rarityBoost[f.rarity]) w *= currentBait.rarityBoost[f.rarity];
-      if (currentBait.favFishIds && currentBait.favFishIds.includes(f.id)) w *= 1.25;
+      if (currentBait.favFishIds && currentBait.favFishIds.includes(f.id)) w *= 1.45;
       if (f.favBaits && f.favBaits.includes(currentBait.id)) w *= 1.35;
-      if (currentBait.id === 6 && f.id === "l5") w *= 2.5;
+      if (terrain.name.includes(f.subZone.replace("เกาะ", ""))) w *= 1.8;
       if (f.cond === "fog") w = 2;
       return { fish: f, w };
     });
@@ -1082,18 +1141,45 @@ function cheatMaxLevel() {
   BAITS.forEach(b => myPlayer.baitCounts[b.id] = 99);
   myPlayer.hasRelic = true;
   updateUI(); renderShop();
-  addLog("✨ [โหมดทดสอบ] ปลดล็อก Lv.100 + สมุดปลา 100% + เหยื่อ 99 ชิ้น + เข็มทิศซากเรือ!", "#fde047");
+  addLog("✨ [โหมดทดสอบ] ปลดล็อก Lv.100 + สมุดปลา 100% + เหยื่อ 99 ชิ้น + ปลดล็อกทุกเกาะ!", "#fde047");
 }
 
-// ================= กระเป๋า สมุดปลา ร้านค้า =================
+// ================= กระเป๋า สมุดปลา แผนที่เกาะ ร้านค้า =================
 function openModal(id) {
   closeModals();
   document.getElementById(id).style.display = "block";
   if (id === "bag-modal") renderBag();
   if (id === "dex-modal") renderDex();
   if (id === "shop-modal") renderShop();
+  if (id === "map-modal") renderMapModal();
 }
 function closeModals() { document.querySelectorAll(".modal").forEach(m => m.style.display = "none"); }
+
+function renderMapModal() {
+  const list = document.getElementById("island-list");
+  list.innerHTML = "";
+  SPECIAL_ISLANDS.forEach(isl => {
+    const canTravel = myPlayer.lvl >= isl.reqLvl && BOATS[myPlayer.boat].maxZone >= isl.zone;
+    list.innerHTML += `
+      <div class="item-row" style="flex-direction:column; align-items:stretch; gap:5px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <strong>${isl.name} <span style="color:#b45309;">(Lv.${isl.reqLvl}+)</span></strong>
+          ${canTravel
+            ? `<button class="btn-blue" onclick="teleportIsland(${isl.x}, ${isl.y}, '${isl.name}')">⛵ เดินทางไป</button>`
+            : `<button disabled>🔒 ต้อง Lv.${isl.reqLvl} & เรือโซน ${isl.zone}</button>`}
+        </div>
+        <div style="font-size:11px; color:#57534e;">${isl.desc}</div>
+      </div>`;
+  });
+}
+
+function teleportIsland(x, y, name) {
+  myPlayer.x = x; myPlayer.y = y + 60;
+  camera.x = myPlayer.x; camera.y = myPlayer.y;
+  closeModals();
+  syncMyState();
+  addLog(`⛵ เทียบท่าที่ ${name} เรียบร้อยแล้ว!`, "#6ee7b7");
+}
 
 function renderBag() {
   const list = document.getElementById("bag-list");
@@ -1223,15 +1309,18 @@ function updateUI() {
   document.getElementById("ui-relic").innerHTML = myPlayer.hasRelic ? `<span style="color:#6ee7b7;">✅ มีเข็มทิศซากเรือ</span>` : `<span style="color:#fda4af;">❌ ยังไม่มีเข็มทิศซากเรือ</span>`;
 }
 
-// ================= 4. ระบบวาดโลกเกาะ Cozy 2.5D Isometric Open World =================
+// ================= 4. ระบบวาดหมู่เกาะ 3D Low-Poly / Cozy Isometric =================
 function initAmbientFish() {
   ambientFish = [];
-  for (let i = 0; i < 35; i++) {
+  const colors = ["#fb923c", "#38bdf8", "#facc15", "#a855f7", "#34d399"];
+  for (let i = 0; i < 65; i++) {
     ambientFish.push({
       x: Math.random() * WORLD_W,
       y: Math.random() * WORLD_H,
-      vx: (Math.random() < 0.5 ? -1 : 1) * (0.4 + Math.random() * 0.6),
+      vx: (Math.random() < 0.5 ? -1 : 1) * (0.5 + Math.random() * 0.7),
       size: 6 + Math.random() * 8,
+      color: colors[i % colors.length],
+      glow: i % 5 === 0,
       phase: Math.random() * Math.PI * 2
     });
   }
@@ -1253,11 +1342,8 @@ function drawIslandWorld(timeSec) {
   const camTop = camera.y - ch / 2;
 
   ctx.save();
-  // 1. พื้นน้ำทะเลลึกและทะเลเปิดรอบเกาะ
-  const seaGrad = ctx.createRadialGradient(
-    ISLAND_CX - camLeft, ISLAND_CY - camTop, 450,
-    ISLAND_CX - camLeft, ISLAND_CY - camTop, 1350
-  );
+  // 1. พื้นน้ำทะเลลึก
+  const seaGrad = ctx.createRadialGradient(ISLAND_CX - camLeft, ISLAND_CY - camTop, 450, ISLAND_CX - camLeft, ISLAND_CY - camTop, 1800);
   if (world.isNight) {
     seaGrad.addColorStop(0, "#0c4a6e");
     seaGrad.addColorStop(0.5, "#082f49");
@@ -1272,11 +1358,11 @@ function drawIslandWorld(timeSec) {
 
   ctx.translate(-camLeft, -camTop);
 
-  // คลื่นน้ำทะเลระยิบระยับ
+  // คลื่นน้ำทะเล
   ctx.strokeStyle = world.isNight ? "rgba(186, 230, 253, 0.08)" : "rgba(255, 255, 255, 0.22)";
   ctx.lineWidth = 2;
-  for (let wy = 120; wy < WORLD_H; wy += 140) {
-    for (let wx = 120; wx < WORLD_W; wx += 220) {
+  for (let wy = 120; wy < WORLD_H; wy += 160) {
+    for (let wx = 120; wx < WORLD_W; wx += 240) {
       const waveShift = Math.sin(timeSec * 2 + wx * 0.01) * 10;
       ctx.beginPath();
       ctx.moveTo(wx + waveShift, wy);
@@ -1285,116 +1371,17 @@ function drawIslandWorld(timeSec) {
     }
   }
 
-  // 2. ฟองคลื่นน้ำตื้นรอบชายหาดเกาะ
-  const foamPulse = Math.sin(timeSec * 2.2) * 8;
-  ctx.fillStyle = world.isNight ? "rgba(14, 116, 144, 0.45)" : "rgba(103, 232, 249, 0.45)";
-  ctx.beginPath();
-  ctx.ellipse(ISLAND_CX, ISLAND_CY + 14, ISLAND_RX + 68 + foamPulse, ISLAND_RY + 56 + foamPulse, 0, 0, Math.PI * 2);
-  ctx.fill();
+  // 2. วาดเกาะหลัก (Home Isle)
+  drawHomeIsland(timeSec);
 
-  // 3. ขอบหน้าผา/ฐานเกาะ 3D
-  ctx.fillStyle = "#926c44";
-  ctx.beginPath();
-  ctx.ellipse(ISLAND_CX, ISLAND_CY + 18, ISLAND_RX + 6, ISLAND_RY + 6, 0, 0, Math.PI * 2);
-  ctx.fill();
+  // 3. วาดหมู่เกาะธีมใหม่ทั้ง 5 เกาะ!
+  drawMangroveIsland(SPECIAL_ISLANDS[1], timeSec);
+  drawFrozenIsland(SPECIAL_ISLANDS[2], timeSec);
+  drawVolcanicIsland(SPECIAL_ISLANDS[3], timeSec);
+  drawShipwreckIsland(SPECIAL_ISLANDS[4], timeSec);
+  drawCandyIsland(SPECIAL_ISLANDS[5], timeSec);
 
-  // 4. หาดทรายสีทองรอบเกาะ
-  const sandGrad = ctx.createRadialGradient(ISLAND_CX, ISLAND_CY, 320, ISLAND_CX, ISLAND_CY, ISLAND_RX);
-  sandGrad.addColorStop(0, "#fde68a");
-  sandGrad.addColorStop(1, "#f59e0b");
-  ctx.fillStyle = sandGrad;
-  ctx.beginPath();
-  ctx.ellipse(ISLAND_CX, ISLAND_CY, ISLAND_RX, ISLAND_RY, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // 5. พื้นหญ้าเขียวขจีกลางเกาะ
-  const grassGrad = ctx.createRadialGradient(ISLAND_CX, ISLAND_CY, 80, ISLAND_CX, ISLAND_CY, ISLAND_RX * 0.86);
-  if (world.isNight) {
-    grassGrad.addColorStop(0, "#1e3a2f");
-    grassGrad.addColorStop(1, "#11261e");
-  } else {
-    grassGrad.addColorStop(0, "#65a30d");
-    grassGrad.addColorStop(0.75, "#4d7c0f");
-    grassGrad.addColorStop(1, "#3f6212");
-  }
-  ctx.fillStyle = grassGrad;
-  ctx.beginPath();
-  ctx.ellipse(ISLAND_CX, ISLAND_CY, ISLAND_RX * 0.87, ISLAND_RY * 0.86, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // 6. ทางเดินดินสีครีมอบอุ่นในหมู่บ้าน
-  ctx.strokeStyle = world.isNight ? "#785c42" : "#e7cba9";
-  ctx.lineWidth = 42;
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-  ctx.beginPath();
-  ctx.moveTo(890, 880);
-  ctx.quadraticCurveTo(1020, 815, 1180, 800);
-  ctx.quadraticCurveTo(1320, 790, 1410, 860);
-  ctx.moveTo(1050, 815);
-  ctx.lineTo(1050, 760);
-  ctx.moveTo(930, 865);
-  ctx.lineTo(930, 840);
-  ctx.stroke();
-
-  // 7. แม่น้ำไหลจากบ่อไปออกทะเลตะวันออก (โซน 2)
-  ctx.fillStyle = world.isNight ? "#0369a1" : "#38bdf8";
-  ctx.beginPath();
-  ctx.roundRect(VILLAGE_POND.x + 60, 876, ISLAND_RX - 40, 88, 30);
-  ctx.fill();
-  ctx.strokeStyle = "#fde68a";
-  ctx.lineWidth = 4;
-  ctx.stroke();
-
-  // 8. บ่อน้ำจืดกลางหมู่บ้าน (โซน 1)
-  ctx.fillStyle = "#5c4028";
-  ctx.beginPath();
-  ctx.ellipse(VILLAGE_POND.x, VILLAGE_POND.y, VILLAGE_POND.rx + 7, VILLAGE_POND.ry + 7, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  const pondGrad = ctx.createRadialGradient(VILLAGE_POND.x - 20, VILLAGE_POND.y - 15, 15, VILLAGE_POND.x, VILLAGE_POND.y, VILLAGE_POND.rx);
-  pondGrad.addColorStop(0, world.isNight ? "#0284c7" : "#67e8f9");
-  pondGrad.addColorStop(1, world.isNight ? "#0c4a6e" : "#0284c7");
-  ctx.fillStyle = pondGrad;
-  ctx.beginPath();
-  ctx.ellipse(VILLAGE_POND.x, VILLAGE_POND.y, VILLAGE_POND.rx, VILLAGE_POND.ry, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  drawLilyPad(VILLAGE_POND.x - 55, VILLAGE_POND.y + 15, 16);
-  drawLilyPad(VILLAGE_POND.x + 65, VILLAGE_POND.y + 35, 13);
-
-  // 9. สะพานไม้ท่าเรือชายหาดตะวันออก
-  ctx.fillStyle = "#7c4d2b";
-  ctx.fillRect(ISLAND_CX + ISLAND_RX - 30, 895, 120, 50);
-  ctx.strokeStyle = "#4a2e1b";
-  ctx.lineWidth = 2;
-  for (let px = ISLAND_CX + ISLAND_RX - 25; px < ISLAND_CX + ISLAND_RX + 85; px += 14) {
-    ctx.strokeRect(px, 895, 14, 50);
-  }
-
-  // 10. เกาะซากเรือจมทางตะวันออกเฉียงใต้ (โซน 6)
-  const wr = ISLAND_PROPS.shipwreckIsland;
-  ctx.fillStyle = "rgba(168, 85, 247, 0.22)";
-  ctx.beginPath();
-  ctx.arc(wr.x, wr.y, 310, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "#d97706";
-  ctx.beginPath();
-  ctx.ellipse(wr.x, wr.y, wr.rx, wr.ry, -0.2, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.save();
-  ctx.translate(wr.x, wr.y - 10);
-  ctx.rotate(-0.35);
-  ctx.fillStyle = "#451a03";
-  ctx.beginPath();
-  ctx.ellipse(0, 0, 75, 28, 0, 0, Math.PI);
-  ctx.fill();
-  ctx.strokeStyle = "#78350f"; ctx.lineWidth = 5;
-  ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(-15, -65); ctx.stroke();
-  ctx.restore();
-
-  // 11. เงาปลาว่ายในบ่อและทะเล
+  // 4. ฝูงปลาว่ายในน้ำ (มีปลาสีสันสดใสและปลาเรืองแสง)
   ambientFish.forEach(f => {
     f.x += f.vx;
     if (f.x < 50) f.x = WORLD_W - 50;
@@ -1402,47 +1389,38 @@ function drawIslandWorld(timeSec) {
     const tInfo = getTerrainInfo(f.x, f.y);
     if (!tInfo.isWater) return;
     ctx.save();
-    ctx.translate(f.x, f.y + Math.sin(timeSec * 2 + f.phase) * 5);
+    ctx.translate(f.x, f.y + Math.sin(timeSec * 2.5 + f.phase) * 5);
     if (f.vx < 0) ctx.scale(-1, 1);
-    ctx.fillStyle = "rgba(0, 20, 40, 0.25)";
+    ctx.fillStyle = (world.isNight && f.glow) ? f.color : "rgba(15, 23, 42, 0.32)";
+    if (world.isNight && f.glow) { ctx.shadowColor = f.color; ctx.shadowBlur = 8; }
     ctx.beginPath();
-    ctx.ellipse(0, 0, f.size * 1.5, f.size * 0.5, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, f.size * 1.4, f.size * 0.55, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-f.size * 1.2, 0); ctx.lineTo(-f.size * 1.9, -f.size * 0.5); ctx.lineTo(-f.size * 1.9, f.size * 0.5); ctx.closePath();
     ctx.fill();
     ctx.restore();
   });
 
-  // 12. ดอกไม้ โขดหิน ต้นกก เสาโคมไฟ
-  ISLAND_PROPS.flowers.forEach(fl => drawFlower(fl.x, fl.y, fl.c));
-  ISLAND_PROPS.rocks.forEach(rk => drawRock(rk.x, rk.y, rk.s));
-  ISLAND_PROPS.reeds.forEach(rd => drawReeds(rd.x, rd.y, timeSec));
-  drawLanternPost(865, 845, timeSec);
-  drawLanternPost(1265, 785, timeSec);
-
-  // 13. บ้านร้านค้า 2.5D & ตัวละคร NPC น่ารัก
-  NPCS.forEach(npc => drawCozyHouseAndNPC(npc, timeSec));
-
-  // 14. บอสปลาหมึกยักษ์คราเคน
+  // 5. บอสปลาหมึกยักษ์คราเคน
   if (world.bossActive) {
     const bobY = Math.sin(timeSec * 2.5) * 6;
     ctx.font = "64px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("🐙", 1950, 750 + bobY);
+    ctx.fillText("🐙", world.bossX, world.bossY + bobY);
     ctx.fillStyle = "#fda4af";
     ctx.font = "bold 13px sans-serif";
-    ctx.fillText("👑 BOSS: ปลาหมึกยักษ์คราเคน", 1950, 700 + bobY);
+    ctx.fillText("👑 BOSS: ปลาหมึกยักษ์คราเคน", world.bossX, world.bossY - 50 + bobY);
   }
 
-  // 15. วาดผู้เล่นทุกคน (บนบก = เดินถือเบ็ดสไตล์ Chibi | ในน้ำ = ขับเรือ)
+  // 6. วาดผู้เล่นทุกคน
   Object.values(otherPlayers).forEach(p => {
-    drawEntity(p.id, p.x, p.y, playerFacing[p.id] || 1, p.name, p.lvl, p.title, p.color, p.boat, p.rod, p.isFishing, p.x + 65, p.y + 15, timeSec);
+    drawEntity(p.id, p.x, p.y, playerFacing[p.id] || 1, p.name, p.lvl, p.title, p.skin || 0, p.boat, p.rod, p.isFishing, p.x + 65, p.y + 15, timeSec);
   });
 
   if (myPlayer) {
-    drawEntity(myPlayer.id, myPlayer.x, myPlayer.y, myPlayer.facing || 1, myPlayer.name, myPlayer.lvl, myPlayer.title, "#6ee7b7", myPlayer.boat, myPlayer.rod, myPlayer.isFishing, myPlayer.bobberX, myPlayer.bobberY, timeSec);
+    drawEntity(myPlayer.id, myPlayer.x, myPlayer.y, myPlayer.facing || 1, myPlayer.name, myPlayer.lvl, myPlayer.title, myPlayer.skin || 0, myPlayer.boat, myPlayer.rod, myPlayer.isFishing, myPlayer.bobberX, myPlayer.bobberY, timeSec);
   }
-
-  // 16. ต้นไม้พุ่มกลมสไตล์ Cozy RPG
-  ISLAND_PROPS.trees.forEach(tr => drawCozyTree(tr.x, tr.y, tr.s));
 
   ctx.restore();
 
@@ -1461,153 +1439,262 @@ function drawIslandWorld(timeSec) {
   }
 }
 
-// ================= ฟังก์ชันวาดองค์ประกอบศิลป์ 2.5D =================
-function drawLilyPad(x, y, r) {
-  ctx.fillStyle = "#4d7c0f";
-  ctx.beginPath();
-  ctx.ellipse(x, y, r, r * 0.7, 0.2, 0.3, Math.PI * 2 - 0.3);
-  ctx.lineTo(x, y);
-  ctx.closePath();
-  ctx.fill();
+// ================= ฟังก์ชันวาดหมู่เกาะต่างๆ =================
+function drawHomeIsland(timeSec) {
+  const foamPulse = Math.sin(timeSec * 2.2) * 8;
+  ctx.fillStyle = world.isNight ? "rgba(14, 116, 144, 0.45)" : "rgba(103, 232, 249, 0.45)";
+  ctx.beginPath(); ctx.ellipse(ISLAND_CX, ISLAND_CY + 14, ISLAND_RX + 68 + foamPulse, ISLAND_RY + 56 + foamPulse, 0, 0, Math.PI * 2); ctx.fill();
+
+  ctx.fillStyle = "#926c44";
+  ctx.beginPath(); ctx.ellipse(ISLAND_CX, ISLAND_CY + 18, ISLAND_RX + 6, ISLAND_RY + 6, 0, 0, Math.PI * 2); ctx.fill();
+
+  const sandGrad = ctx.createRadialGradient(ISLAND_CX, ISLAND_CY, 320, ISLAND_CX, ISLAND_CY, ISLAND_RX);
+  sandGrad.addColorStop(0, "#fde68a"); sandGrad.addColorStop(1, "#f59e0b");
+  ctx.fillStyle = sandGrad;
+  ctx.beginPath(); ctx.ellipse(ISLAND_CX, ISLAND_CY, ISLAND_RX, ISLAND_RY, 0, 0, Math.PI * 2); ctx.fill();
+
+  const grassGrad = ctx.createRadialGradient(ISLAND_CX, ISLAND_CY, 80, ISLAND_CX, ISLAND_CY, ISLAND_RX * 0.86);
+  grassGrad.addColorStop(0, world.isNight ? "#1e3a2f" : "#65a30d");
+  grassGrad.addColorStop(1, world.isNight ? "#11261e" : "#3f6212");
+  ctx.fillStyle = grassGrad;
+  ctx.beginPath(); ctx.ellipse(ISLAND_CX, ISLAND_CY, ISLAND_RX * 0.87, ISLAND_RY * 0.86, 0, 0, Math.PI * 2); ctx.fill();
+
+  // แม่น้ำและบ่อหมู่บ้าน
+  ctx.fillStyle = world.isNight ? "#0369a1" : "#38bdf8";
+  ctx.beginPath(); ctx.roundRect(VILLAGE_POND.x + 60, 876, ISLAND_RX - 40, 88, 30); ctx.fill();
+
+  ctx.fillStyle = "#5c4028";
+  ctx.beginPath(); ctx.ellipse(VILLAGE_POND.x, VILLAGE_POND.y, VILLAGE_POND.rx + 7, VILLAGE_POND.ry + 7, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = world.isNight ? "#0284c7" : "#67e8f9";
+  ctx.beginPath(); ctx.ellipse(VILLAGE_POND.x, VILLAGE_POND.y, VILLAGE_POND.rx, VILLAGE_POND.ry, 0, 0, Math.PI * 2); ctx.fill();
+
+  // กองไฟอบอุ่นกลางหมู่บ้าน
+  ctx.fillStyle = "rgba(251, 146, 60, 0.25)";
+  ctx.beginPath(); ctx.arc(1120, 1065, 38 + Math.sin(timeSec * 8) * 4, 0, Math.PI * 2); ctx.fill();
+  ctx.font = "26px sans-serif"; ctx.textAlign = "center";
+  ctx.fillText("🔥", 1120, 1072);
+
+  ISLAND_PROPS.flowers.forEach(fl => drawFlower(fl.x, fl.y, fl.c));
+  ISLAND_PROPS.rocks.forEach(rk => drawRock(rk.x, rk.y, rk.s));
+  NPCS.forEach(npc => drawCozyHouseAndNPC(npc, timeSec));
+  ISLAND_PROPS.trees.forEach(tr => drawCozyTree(tr.x, tr.y, tr.s));
 }
 
+function drawMangroveIsland(isl, timeSec) {
+  ctx.save();
+  ctx.fillStyle = "rgba(16, 185, 129, 0.18)";
+  ctx.beginPath(); ctx.ellipse(isl.x, isl.y, isl.rx + 45, isl.ry + 35, 0, 0, Math.PI * 2); ctx.fill();
+
+  ctx.fillStyle = "#14532d";
+  ctx.beginPath(); ctx.ellipse(isl.x, isl.y, isl.rx, isl.ry, 0, 0, Math.PI * 2); ctx.fill();
+
+  // ต้นโกงกางและโคมไฟเรืองแสง
+  const spots = [[-90, -40], [80, -50], [-40, 60], [100, 45], [0, -10]];
+  spots.forEach(([ox, oy], idx) => {
+    drawCozyTree(isl.x + ox, isl.y + oy, 1.25);
+    const glow = 0.7 + Math.sin(timeSec * 4 + idx) * 0.3;
+    ctx.fillStyle = `rgba(253, 224, 71, ${0.35 * glow})`;
+    ctx.beginPath(); ctx.arc(isl.x + ox + 15, isl.y + oy + 8, 22, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#fde047";
+    ctx.fillRect(isl.x + ox + 11, isl.y + oy + 2, 8, 12);
+  });
+  drawIslandLabel(isl.x, isl.y - isl.ry - 16, "🌿 MANGROVE ISLE (Lv.20+)");
+  ctx.restore();
+}
+
+function drawFrozenIsland(isl, timeSec) {
+  ctx.save();
+  ctx.fillStyle = "rgba(56, 189, 248, 0.25)";
+  ctx.beginPath(); ctx.ellipse(isl.x, isl.y, isl.rx + 45, isl.ry + 35, 0, 0, Math.PI * 2); ctx.fill();
+
+  ctx.fillStyle = "#bae6fd";
+  ctx.beginPath(); ctx.ellipse(isl.x, isl.y + 12, isl.rx, isl.ry, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#f0f9ff";
+  ctx.beginPath(); ctx.ellipse(isl.x, isl.y, isl.rx - 10, isl.ry - 10, 0, 0, Math.PI * 2); ctx.fill();
+
+  // บ้านอิกลู & ผลึกน้ำแข็งเรืองแสง
+  ctx.fillStyle = "#e0f2fe"; ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(isl.x, isl.y, 44, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = "#fde047";
+  ctx.beginPath(); ctx.arc(isl.x, isl.y, 14, Math.PI, 0); ctx.fill();
+
+  [[-120, -30], [115, -20], [-95, 65], [105, 60]].forEach(([ox, oy]) => {
+    ctx.fillStyle = "#38bdf8";
+    ctx.beginPath();
+    ctx.moveTo(isl.x + ox, isl.y + oy - 35);
+    ctx.lineTo(isl.x + ox + 14, isl.y + oy + 10);
+    ctx.lineTo(isl.x + ox - 14, isl.y + oy + 10);
+    ctx.closePath(); ctx.fill();
+  });
+  drawIslandLabel(isl.x, isl.y - isl.ry - 16, "❄️ FROZEN ISLE (Lv.40+)");
+  ctx.restore();
+}
+
+function drawVolcanicIsland(isl, timeSec) {
+  ctx.save();
+  ctx.fillStyle = "rgba(249, 115, 22, 0.25)";
+  ctx.beginPath(); ctx.ellipse(isl.x, isl.y, isl.rx + 45, isl.ry + 35, 0, 0, Math.PI * 2); ctx.fill();
+
+  ctx.fillStyle = "#1e293b";
+  ctx.beginPath(); ctx.ellipse(isl.x, isl.y, isl.rx, isl.ry, 0, 0, Math.PI * 2); ctx.fill();
+
+  // ปล่องภูเขาไฟ & ธารลาวาเรืองแสง
+  ctx.fillStyle = "#0f172a";
+  ctx.beginPath();
+  ctx.moveTo(isl.x - 85, isl.y + 30); ctx.lineTo(isl.x - 20, isl.y - 75);
+  ctx.lineTo(isl.x + 25, isl.y - 75); ctx.lineTo(isl.x + 90, isl.y + 30);
+  ctx.closePath(); ctx.fill();
+
+  const lavaGlow = 0.8 + Math.sin(timeSec * 4) * 0.2;
+  ctx.strokeStyle = `rgba(249, 115, 22, ${lavaGlow})`;
+  ctx.lineWidth = 12; ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(isl.x, isl.y - 70);
+  ctx.quadraticCurveTo(isl.x + 35, isl.y - 10, isl.x + 120, isl.y + 50);
+  ctx.moveTo(isl.x - 10, isl.y - 65);
+  ctx.quadraticCurveTo(isl.x - 50, isl.y + 10, isl.x - 130, isl.y + 40);
+  ctx.stroke();
+
+  drawIslandLabel(isl.x, isl.y - isl.ry - 16, "🌋 VOLCANIC ISLE (Lv.60+)");
+  ctx.restore();
+}
+
+function drawShipwreckIsland(isl, timeSec) {
+  ctx.save();
+  ctx.fillStyle = "rgba(168, 85, 247, 0.22)";
+  ctx.beginPath(); ctx.arc(isl.x, isl.y, isl.rx + 60, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#d97706";
+  ctx.beginPath(); ctx.ellipse(isl.x, isl.y, isl.rx, isl.ry, -0.2, 0, Math.PI * 2); ctx.fill();
+
+  ctx.save();
+  ctx.translate(isl.x, isl.y - 10); ctx.rotate(-0.35);
+  ctx.fillStyle = "#451a03";
+  ctx.beginPath(); ctx.ellipse(0, 0, 75, 28, 0, 0, Math.PI); ctx.fill();
+  ctx.strokeStyle = "#78350f"; ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(-15, -65); ctx.stroke();
+  ctx.restore();
+  drawIslandLabel(isl.x, isl.y - isl.ry - 16, "🏴‍☠️ SHIPWRECK ISLE (Lv.80+)");
+  ctx.restore();
+}
+
+function drawCandyIsland(isl, timeSec) {
+  ctx.save();
+  ctx.fillStyle = "rgba(244, 114, 182, 0.28)";
+  ctx.beginPath(); ctx.ellipse(isl.x, isl.y, isl.rx + 45, isl.ry + 35, 0, 0, Math.PI * 2); ctx.fill();
+
+  // พื้นเกาะครีมชมพูพาสเทล
+  ctx.fillStyle = "#fbcfe8";
+  ctx.beginPath(); ctx.ellipse(isl.x, isl.y, isl.rx, isl.ry, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#fdf2f8";
+  ctx.beginPath(); ctx.ellipse(isl.x, isl.y, isl.rx - 25, isl.ry - 20, 0, 0, Math.PI * 2); ctx.fill();
+
+  // ต้นสายไหมสีชมพู-ฟ้า & อมยิ้มยักษ์
+  [[-120, -40, "#f472b6"], [125, -35, "#60a5fa"], [-95, 65, "#c084fc"], [110, 60, "#f472b6"]].forEach(([ox, oy, col]) => {
+    ctx.fillStyle = "#fef3c7"; ctx.fillRect(isl.x + ox - 4, isl.y + oy, 8, 22);
+    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(isl.x + ox, isl.y + oy - 12, 24, 0, Math.PI * 2); ctx.fill();
+  });
+
+  // อมยิ้มยักษ์กลางเกาะ
+  ctx.fillStyle = "#ffffff"; ctx.fillRect(isl.x - 4, isl.y - 45, 8, 55);
+  ctx.fillStyle = "#ec4899"; ctx.beginPath(); ctx.arc(isl.x, isl.y - 55, 28, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.arc(isl.x, isl.y - 55, 16, 0, Math.PI * 1.5); ctx.stroke();
+
+  drawIslandLabel(isl.x, isl.y - isl.ry - 16, "🍭 CANDY ISLE (Lv.80+)");
+  ctx.restore();
+}
+
+function drawIslandLabel(x, y, text) {
+  ctx.font = "bold 12px sans-serif";
+  ctx.textAlign = "center";
+  const w = ctx.measureText(text).width + 18;
+  ctx.fillStyle = "rgba(15, 23, 42, 0.8)";
+  ctx.beginPath(); ctx.roundRect(x - w / 2, y - 13, w, 20, 10); ctx.fill();
+  ctx.fillStyle = "#fde047";
+  ctx.fillText(text, x, y + 1);
+}
+
+// ================= ฟังก์ชันวาดต้นไม้ บ้าน ตัวละคร และเบ็ด 4 ระดับ =================
 function drawFlower(x, y, color) {
-  ctx.fillStyle = "#15803d";
-  ctx.beginPath(); ctx.arc(x, y + 3, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#15803d"; ctx.beginPath(); ctx.arc(x, y + 3, 5, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = color;
   for (let i = 0; i < 5; i++) {
     const a = (i * Math.PI * 2) / 5;
     ctx.beginPath(); ctx.arc(x + Math.cos(a) * 3.5, y + Math.sin(a) * 3.5, 2.5, 0, Math.PI * 2); ctx.fill();
   }
-  ctx.fillStyle = "#f59e0b";
-  ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI * 2); ctx.fill();
 }
 
 function drawRock(x, y, s) {
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
-  ctx.fillStyle = "rgba(0,0,0,0.25)";
-  ctx.beginPath(); ctx.ellipse(2, 10, 22, 10, 0, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = "#475569";
   ctx.beginPath(); ctx.arc(0, 0, 18, Math.PI, 0); ctx.lineTo(20, 8); ctx.lineTo(-20, 8); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = "#94a3b8";
-  ctx.beginPath(); ctx.arc(-4, -4, 11, Math.PI, 0); ctx.fill();
   ctx.restore();
-}
-
-function drawReeds(x, y, timeSec) {
-  const sway = Math.sin(timeSec * 2.5 + x) * 3;
-  ctx.strokeStyle = "#3f6212"; ctx.lineWidth = 3;
-  for (let i = -1; i <= 1; i++) {
-    ctx.beginPath();
-    ctx.moveTo(x + i * 6, y + 8);
-    ctx.quadraticCurveTo(x + i * 8 + sway, y - 12, x + i * 10 + sway * 1.4, y - 28);
-    ctx.stroke();
-    ctx.fillStyle = "#713f12";
-    ctx.beginPath();
-    ctx.ellipse(x + i * 9 + sway, y - 18, 3, 7, 0.1, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
-
-function drawLanternPost(x, y, timeSec) {
-  ctx.fillStyle = "#5c3a21";
-  ctx.fillRect(x - 3, y - 38, 6, 42);
-  ctx.fillRect(x - 3, y - 38, 16, 5);
-  const glow = 0.85 + Math.sin(timeSec * 5) * 0.15;
-  ctx.fillStyle = `rgba(253, 224, 71, ${0.25 * glow})`;
-  ctx.beginPath(); ctx.arc(x + 11, y - 24, 24, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#fbbf24";
-  ctx.beginPath(); ctx.roundRect(x + 6, y - 32, 10, 14, 4); ctx.fill();
 }
 
 function drawCozyTree(x, y, s) {
   ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
-  ctx.fillStyle = "rgba(0,0,0,0.22)";
-  ctx.beginPath(); ctx.ellipse(0, 16, 26, 11, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#6e472b";
-  ctx.fillRect(-6, -8, 12, 24);
+  ctx.fillStyle = "#6e472b"; ctx.fillRect(-6, -8, 12, 24);
   ctx.fillStyle = world.isNight ? "#14532d" : "#15803d";
   ctx.beginPath(); ctx.arc(0, -22, 26, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = world.isNight ? "#166534" : "#22c55e";
   ctx.beginPath(); ctx.arc(-6, -27, 20, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = world.isNight ? "#15803d" : "#4ade80";
-  ctx.beginPath(); ctx.arc(-9, -32, 12, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
 }
 
 function drawCozyHouseAndNPC(npc, timeSec) {
-  const hx = npc.x - 45;
-  const hy = npc.y - 35;
-
-  ctx.fillStyle = "rgba(0,0,0,0.25)";
-  ctx.beginPath(); ctx.ellipse(hx, hy + 28, 52, 20, 0, 0, Math.PI * 2); ctx.fill();
-
-  ctx.fillStyle = "#fef3c7";
-  ctx.strokeStyle = "#5c3a21"; ctx.lineWidth = 2.5;
+  const hx = npc.x - 45, hy = npc.y - 35;
+  ctx.fillStyle = "#fef3c7"; ctx.strokeStyle = "#5c3a21"; ctx.lineWidth = 2.5;
   ctx.beginPath(); ctx.roundRect(hx - 38, hy - 18, 76, 44, 6); ctx.fill(); ctx.stroke();
-
-  ctx.fillStyle = "#7c4d2b";
-  ctx.beginPath(); ctx.arc(hx + 12, hy + 10, 11, Math.PI, 0); ctx.lineTo(hx + 23, hy + 26); ctx.lineTo(hx + 1, hy + 26); ctx.closePath(); ctx.fill();
-
   ctx.fillStyle = npc.roof;
-  ctx.beginPath();
-  ctx.moveTo(hx - 46, hy - 14);
-  ctx.lineTo(hx, hy - 48);
-  ctx.lineTo(hx + 46, hy - 14);
-  ctx.closePath();
-  ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(hx - 46, hy - 14); ctx.lineTo(hx, hy - 48); ctx.lineTo(hx + 46, hy - 14); ctx.closePath(); ctx.fill(); ctx.stroke();
 
-  for (let i = 0; i < 5; i++) {
-    ctx.fillStyle = i % 2 === 0 ? "#ffffff" : npc.dress;
-    ctx.fillRect(hx - 38 + i * 11, hy - 2, 11, 12);
-  }
-
-  drawChibiCharacter(npc.x, npc.y, 1, npc.hair, npc.dress, false, timeSec);
-
-  ctx.font = "bold 11px sans-serif";
-  ctx.textAlign = "center";
+  drawChibiCharacter(npc.x, npc.y, 1, 1, timeSec);
+  ctx.font = "bold 11px sans-serif"; ctx.textAlign = "center";
   const tw = ctx.measureText(npc.name).width;
   ctx.fillStyle = "rgba(34, 24, 18, 0.82)";
   ctx.beginPath(); ctx.roundRect(npc.x - tw / 2 - 8, npc.y - 44, tw + 16, 18, 9); ctx.fill();
-  ctx.fillStyle = "#fde047";
-  ctx.fillText(npc.name, npc.x, npc.y - 31);
+  ctx.fillStyle = "#fde047"; ctx.fillText(npc.name, npc.x, npc.y - 31);
 }
 
-function drawChibiCharacter(x, y, facing, hairColor, outfitColor, hasHat, timeSec) {
+function drawChibiCharacter(x, y, facing, skinId, timeSec) {
+  const sk = SKINS[skinId] || SKINS[0];
   const bob = Math.sin(timeSec * 4 + x) * 1.5;
-  ctx.save();
-  ctx.translate(x, y + bob);
+  ctx.save(); ctx.translate(x, y + bob);
 
+  // เงา
   ctx.fillStyle = "rgba(0,0,0,0.3)";
   ctx.beginPath(); ctx.ellipse(0, 14, 12, 5, 0, 0, Math.PI * 2); ctx.fill();
 
-  ctx.fillStyle = outfitColor;
-  ctx.beginPath(); ctx.roundRect(-8, 0, 16, 13, 5); ctx.fill();
+  // กางเกง & เสื้อ (ตัวละครนักตกปลาหมวกแดงเสื้อฟ้า)
+  ctx.fillStyle = sk.pants;
+  ctx.fillRect(-6, 8, 5, 6); ctx.fillRect(1, 8, 5, 6);
+  ctx.fillStyle = sk.shirt;
+  ctx.beginPath(); ctx.roundRect(-8, -1, 16, 11, 4); ctx.fill();
 
+  // หัวและผม
   ctx.fillStyle = "#ffedd5";
-  ctx.beginPath(); ctx.arc(0, -8, 10, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(0, -9, 10, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = sk.hair;
+  ctx.beginPath(); ctx.arc(0, -10, 10.2, Math.PI, 0); ctx.fill();
 
-  ctx.fillStyle = hairColor;
-  ctx.beginPath(); ctx.arc(0, -10, 10.5, Math.PI, 0); ctx.fill();
-
+  // ดวงตา
   ctx.fillStyle = "#1e293b";
   ctx.beginPath();
-  ctx.arc(facing * 3 - 2, -7, 1.5, 0, Math.PI * 2);
-  ctx.arc(facing * 3 + 3, -7, 1.5, 0, Math.PI * 2);
+  ctx.arc(facing * 3 - 2, -8, 1.5, 0, Math.PI * 2);
+  ctx.arc(facing * 3 + 3, -8, 1.5, 0, Math.PI * 2);
   ctx.fill();
 
-  if (hasHat) {
-    ctx.fillStyle = "#d6bc94";
-    ctx.strokeStyle = "#7c4d2b"; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.ellipse(0, -15, 16, 5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    ctx.beginPath(); ctx.arc(0, -16, 9, Math.PI, 0); ctx.fill(); ctx.stroke();
-  }
+  // หมวกแก๊ปสีแดงสไตล์ Low-Poly
+  ctx.fillStyle = sk.cap;
+  ctx.beginPath(); ctx.arc(0, -12, 10.5, Math.PI, 0); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(facing * 6, -12, 9, 3, 0, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
 }
 
-function drawEntity(playerId, x, y, facing, rawName, lvl, title, color, boatId, rodId, isFishing, bobberX, bobberY, timeSec) {
+function drawEntity(playerId, x, y, facing, rawName, lvl, title, skinId, boatId, rodId, isFishing, bobberX, bobberY, timeSec) {
   const terrain = getTerrainInfo(x, y);
   const isMax = lvl >= MAX_LEVEL;
+  const rodInfo = RODS[rodId] || RODS[0];
 
   if (terrain.isWater) {
     ctx.save();
@@ -1624,21 +1711,25 @@ function drawEntity(playerId, x, y, facing, rawName, lvl, title, color, boatId, 
     ctx.quadraticCurveTo(0, 14, facing * 28, 0);
     ctx.fill(); ctx.stroke();
 
-    drawChibiCharacter(0, -6, facing, "#c084fc", color, true, timeSec);
+    drawChibiCharacter(0, -6, facing, skinId, timeSec);
     ctx.restore();
   } else {
-    drawChibiCharacter(x, y, facing, "#c084fc", color, true, timeSec);
+    drawChibiCharacter(x, y, facing, skinId, timeSec);
   }
 
+  // วาดคันเบ็ดในมือ (เปลี่ยนสีและเอฟเฟกต์เรืองแสงตามระดับเบ็ด 4 Tier!)
+  const tipX = x + facing * 26;
+  const tipY = y - 16;
+  ctx.save();
+  if (rodInfo.glow) { ctx.shadowColor = rodInfo.color; ctx.shadowBlur = 10; }
+  ctx.strokeStyle = rodInfo.color;
+  ctx.lineWidth = 3.2;
+  ctx.beginPath(); ctx.moveTo(x + facing * 6, y - 2); ctx.lineTo(tipX, tipY); ctx.stroke();
+  ctx.restore();
+
   if (isFishing) {
-    const tipX = x + facing * 24;
-    const tipY = y - 14;
     const bx = bobberX || (x + facing * 75);
     const by = (bobberY || (y + 25)) + Math.sin(timeSec * 6) * 2.5;
-
-    ctx.strokeStyle = rodId >= 5 ? "#fde047" : "#78350f";
-    ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(x + facing * 6, y - 2); ctx.lineTo(tipX, tipY); ctx.stroke();
 
     ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
     ctx.lineWidth = 1.2;
@@ -1647,24 +1738,12 @@ function drawEntity(playerId, x, y, facing, rawName, lvl, title, color, boatId, 
     ctx.quadraticCurveTo((tipX + bx) / 2, Math.max(tipY, by) + 12, bx, by);
     ctx.stroke();
 
-    ctx.strokeStyle = "rgba(255,255,255,0.65)";
-    ctx.beginPath(); ctx.ellipse(bx, by + 2, 8 + Math.sin(timeSec * 5) * 2, 3.5, 0, 0, Math.PI * 2); ctx.stroke();
-
-    ctx.fillStyle = "#ef4444";
-    ctx.beginPath(); ctx.arc(bx, by, 4.5, Math.PI, 0); ctx.fill();
-    ctx.fillStyle = "#ffffff";
-    ctx.beginPath(); ctx.arc(bx, by, 4.5, 0, Math.PI); ctx.fill();
-
-    ctx.fillStyle = "#ffffff";
-    ctx.beginPath(); ctx.arc(x, y - 48, 12, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = "#0284c7"; ctx.lineWidth = 2; ctx.stroke();
-    ctx.font = "13px sans-serif"; ctx.textAlign = "center";
-    ctx.fillText("🎣", x, y - 43);
+    ctx.fillStyle = "#ef4444"; ctx.beginPath(); ctx.arc(bx, by, 4.5, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(bx, by, 4.5, 0, Math.PI); ctx.fill();
   }
 
   const labelText = `${isMax ? '👑 ' : ''}${rawName} Lv${lvl}`;
-  ctx.font = "bold 11.5px sans-serif";
-  ctx.textAlign = "center";
+  ctx.font = "bold 11.5px sans-serif"; ctx.textAlign = "center";
   const tw = ctx.measureText(labelText).width;
   ctx.fillStyle = "rgba(20, 14, 10, 0.72)";
   ctx.beginPath(); ctx.roundRect(x - tw / 2 - 6, y + 18, tw + 12, 16, 6); ctx.fill();
